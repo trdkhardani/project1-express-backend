@@ -13,3 +13,138 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Admin {
+  admin_id String @id @default(uuid())
+  cinema_chain_id String
+  admin_email String @unique @db.VarChar(50)
+  admin_username String @unique @db.Char(15)
+  admin_password String
+  cinema_chain Cinema_Chain @relation(fields: [cinema_chain_id], references: [cinema_chain_id], onDelete: Cascade)
+
+  @@map("admins")
+}
+
+model Cinema_Chain {
+  cinema_chain_id String @id @default(uuid())
+  cinema_chain_brand String
+  cinema_chain_logo String
+  admin Admin[]
+  theater Theater[]
+
+  @@map("cinema_chains")
+}
+
+model User {
+  user_id String @id @default(uuid())
+  user_name String @db.VarChar(100)
+  user_username String @unique @db.Char(15)
+  user_email String @unique @db.VarChar(50)
+  user_password String
+  user_status UserStatus
+  booking Booking[]
+
+  @@map("users")
+}
+
+model Movie {
+  movie_id String @id @default(uuid())
+  movie_title String
+  movie_synopsis String @db.Text
+  movie_duration Int @db.SmallInt
+  movie_poster String
+  showtime Showtime[]
+
+  @@map("movies")
+}
+
+model Theater {
+  theater_id String @id @default(uuid())
+  cinema_chain_id String
+  theater_location String
+  theater_city String
+  showtime Showtime[]
+  cinema_chain Cinema_Chain @relation(fields: [cinema_chain_id], references: [cinema_chain_id], onDelete: Cascade)
+  seat Seat[]
+
+  @@map("theaters")
+}
+
+model Seat {
+  seat_id Int @id @default(autoincrement())
+  theater_id String
+  seat_row String @db.Char(1)
+  seat_number Int @db.SmallInt
+  theater Theater @relation(fields: [theater_id], references: [theater_id], onDelete: Cascade)
+  booking_seat BookingSeat[]
+
+  @@map("seats")
+}
+
+model Showtime {
+  showtime_id String @id @default(uuid())
+  theater_id String
+  movie_id String
+  showtime_price Int
+  showtime_start_date DateTime
+  theater Theater @relation(fields: [theater_id], references: [theater_id], onDelete: Cascade)
+  movie Movie @relation(fields: [movie_id], references: [movie_id], onDelete: Cascade)
+  booking Booking[]
+
+  @@map("showtimes")
+}
+
+model Booking {
+  booking_id String @id @default(uuid())
+  showtime_id String
+  user_id String
+  booking_payment_status PaymentStatus
+  booking_payment_method String?
+  booking_date_created DateTime @default(now())
+  showtime Showtime @relation(fields: [showtime_id], references: [showtime_id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  booking_seat BookingSeat[]
+
+  @@map("bookings")
+}
+
+model BookingSeat {
+  booking_seat_id String @id @default(uuid())
+  seat_id Int
+  booking_id String
+  seat Seat @relation(fields: [seat_id], references: [seat_id], onDelete: Cascade)
+  booking Booking @relation(fields: [booking_id], references: [booking_id], onDelete: Cascade)
+  ticket Ticket[]
+
+  @@map("booking_seats")
+}
+
+model Ticket {
+  ticket_id String @id @default(uuid())
+  booking_seat_id String
+  ticket_issued_at DateTime @default(now())
+  ticket_qr_code String
+  ticket_status TicketStatus
+  booking_seat BookingSeat @relation(fields: [booking_seat_id], references: [booking_seat_id], onDelete: Cascade)
+
+  @@map("tickets")
+}
+
+enum UserStatus {
+  VERIFIED
+  UNVERIFIED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESSFUL
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum TicketStatus {
+  VALID
+  USED
+  REFUNDED
+}
