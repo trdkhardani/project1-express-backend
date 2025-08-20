@@ -3,9 +3,20 @@ export enum Status {
     false = "error"
 }
 
-export interface ResponseInterface {
+export interface StatusCode {
+    statusCode?: number
+}
+
+export interface ResponseInterface<T> extends StatusCode {
     status: Status,
-    statusCode?: number,
+    // statusCode?: number,
     data: any,
     message: string
+}
+
+export interface ErrorResponse extends ResponseInterface<{}> {
+    status: Status.false,
+    // statusCode?: number,
+    data: null,
+    message: string | "Error"
 }

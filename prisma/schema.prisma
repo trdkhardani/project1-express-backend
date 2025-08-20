@@ -41,7 +41,7 @@ model User {
   user_username String @unique @db.Char(15)
   user_email String @unique @db.VarChar(50)
   user_password String
-  user_status UserStatus
+  user_status UserStatus @default(UNVERIFIED)
   booking Booking[]
 
   @@map("users")
