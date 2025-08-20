@@ -3,11 +3,11 @@ export enum Status {
     false = "error"
 }
 
-export interface StatusCode {
+export interface HttpStatusCode {
     statusCode?: number
 }
 
-export interface ResponseInterface<T> extends StatusCode {
+export interface ResponseInterface<T> extends HttpStatusCode {
     status: Status,
     // statusCode?: number,
     data: any,

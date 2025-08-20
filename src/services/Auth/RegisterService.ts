@@ -66,9 +66,15 @@ export async function register(userData: UserRegistrationInterface):Promise<Resp
             message: "Verification link successfully sent to your email"
         }
     } catch(err: any) {
-        // console.error(err)
+        console.error(err)
         if(err.code === "P2002"){
             return await conflictResponse("Email or username already exists")
+        } else {
+            return {
+            status: Status.false,
+            data: null,
+            message: "Error"
+            }
         }
     }
 };
