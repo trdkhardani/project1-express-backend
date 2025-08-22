@@ -1,4 +1,5 @@
 import * as z from 'zod';
+import { UserRole } from '../models/user';
 
 export const RegisterUserData = z.object({
     userEmail: z.email("Email must in a valid format"),
@@ -10,5 +11,6 @@ export const RegisterUserData = z.object({
 export const LoginUserData = z.object({
     userEmail: z.email("Email must in a valid format").optional(),
     userUsername: z.coerce.string().optional(),
-    userPassword: z.coerce.string("Invalid password")
+    userPassword: z.coerce.string("Invalid password"),
+    userRole: z.string().default(UserRole.USER)
 })

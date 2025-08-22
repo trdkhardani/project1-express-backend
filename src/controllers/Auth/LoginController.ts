@@ -10,21 +10,34 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         const {
             user_email,
             user_username,
-            user_password
+            user_password,
+            user_role
         } = req.body
     
         const validatedData = LoginUserData.parse({
             userEmail: user_email,
             userUsername: user_username,
-            userPassword: user_password
+            userPassword: user_password,
+            userRole: user_role
         })
 
-        const response = await LoginService.login({
-            user_email: validatedData.userEmail as string,
-            user_username: validatedData.userUsername as string,
-            user_password: validatedData.userPassword,
-            user_role: UserRole.USER
-        })
+        let response;
+        if(validatedData.userRole.toLowerCase() === UserRole.ADMIN) {
+            response = await LoginService.loginAdmin({
+                email: validatedData.userEmail as string,
+                username: validatedData.userUsername as string,
+                password: validatedData.userPassword,
+                role: UserRole.ADMIN
+            })
+        } else {
+            response = await LoginService.loginUser({
+                email: validatedData.userEmail as string,
+                username: validatedData.userUsername as string,
+                password: validatedData.userPassword,
+                role: UserRole.USER
+            })
+        }
+
 
         return res.status(Number(response.statusCode)).json(response)
     } catch(err) {
