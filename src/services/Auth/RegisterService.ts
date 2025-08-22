@@ -4,7 +4,7 @@ import jwt, { type JwtPayload } from 'jsonwebtoken'
 import type { UserDataPayload, UserRegistrationInterface } from '../../models/user';
 import { MailerUtils } from '../../utils/mailer.utils';
 import { Status, type ResponseInterface } from '../../models/response';
-import { badRequestResponse, conflictResponse } from '../../utils/response.utils';
+import { badRequestResponse, conflictResponse, successResponse } from '../../utils/response.utils';
 const prisma = new PrismaClient();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY as string
 
@@ -78,3 +78,36 @@ export async function register(userData: UserRegistrationInterface):Promise<Resp
         }
     }
 };
+
+export async function resendVerification(userEmail: string):Promise<ResponseInterface<{}>> {
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                user_email: userEmail
+            }
+        })
+
+        if(user?.user_status === "VERIFIED") {
+            return await conflictResponse(`User with email ${user.user_email} has already been verified`)
+        }
+
+        const tokenizedUserId = jwt.sign({user_id: user?.user_id}, JWT_SECRET_KEY, {
+            expiresIn: '1h'
+        })
+
+        MailerUtils.sendUserVerificationEmail({
+            userEmail: user?.user_email as string,
+            userName: user?.user_name as string,
+            userId: tokenizedUserId
+        })
+
+        return successResponse(null, `Verification email resent to ${user?.user_email}`)
+    } catch(err: any) {
+        console.error(err);
+        return {
+            status: Status.false,
+            data: null,
+            message: "Error"
+        }
+    }
+}

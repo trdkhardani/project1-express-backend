@@ -10,7 +10,7 @@ export interface HttpStatusCode {
 export interface ResponseInterface<T> extends HttpStatusCode {
     status: Status,
     // statusCode?: number,
-    data: any,
+    data?: any,
     message: string
 }
 

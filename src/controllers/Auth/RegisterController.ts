@@ -45,3 +45,22 @@ export async function verifyUser(req: Request, res: Response, next: NextFunction
         next(err)
     }
 }
+
+export async function resendVerification(req: Request, res: Response, next: NextFunction) {
+    try {
+        const user_email = req.body.user_email
+
+        const validatedData = RegisterUserData.parse({
+            userEmail: user_email
+        })
+
+        const response = await RegisterService.resendVerification(validatedData.userEmail)
+
+        return res.status(Number(response.statusCode)).json(response)
+    } catch(err) {
+        next(err)
+        if(err instanceof ZodError) {
+            return res.status(400).json(await badRequestResponse(err.issues[0]?.message as string))
+        }
+    }
+}

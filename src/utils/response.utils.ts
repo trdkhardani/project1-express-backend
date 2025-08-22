@@ -1,5 +1,14 @@
 import { Status, type ResponseInterface } from '../models/response';
 
+export const successResponse = async (data: any, message: string) => {
+    return {
+        status: Status.true,
+        statusCode: 200,
+        data: data,
+        message: message || "Success"
+    }
+}
+
 export const badRequestResponse = async (message: string) => {
     return {
         status: Status.false,

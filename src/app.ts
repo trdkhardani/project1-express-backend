@@ -12,6 +12,6 @@ app.use("/", IndexRoutes);
 app.use("/api/v1", AuthRoutes)
 
 // Error Handler
-// app.use(ErrorHandler);
+app.use(ErrorHandler);
 
 export default app;

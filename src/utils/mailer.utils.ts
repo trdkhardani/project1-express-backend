@@ -10,21 +10,25 @@ const {
 
 export class MailerUtils {
     static sendEmail = (mailOptions: SendMailOptions) => {
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: EMAIL_USER,
-                pass: EMAIL_PASS
-            }
-        })
-    
-        transporter.sendMail(mailOptions, (err, info) => {
-            if(err) {
-                throw err;
-            } else {
-                console.log(`Email sent ${info.response}`)
-            }
-        })
+        try {
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: EMAIL_USER,
+                    pass: EMAIL_PASS
+                }
+            })
+        
+            transporter.sendMail(mailOptions, (err, info) => {
+                if(err) {
+                    throw err;
+                } else {
+                    console.log(`Email sent ${info.response}`)
+                }
+            })
+        } catch(err) {
+            return console.error(err)
+        }
     }
     
     static sendUserVerificationEmail = (emailData: UserVerificationEmail) => {
@@ -50,7 +54,7 @@ export class MailerUtils {
                     <p style="word-break:break-all; color:#555;">${verificationLink}</p>
                     <hr style="margin:30px 0; border:none; border-top:1px solid #eee;" />
                     <p style="font-size:12px; color:#888;">
-                    This link will expire in 24 hours. If you didn’t create an account with Moovee-Oh, you can safely ignore this email.
+                    This link will expire in 1 hour. If you didn’t create an account with Moovee-Oh, you can safely ignore this email.
                     </p>
                 </div>
             `
