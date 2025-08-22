@@ -17,3 +17,12 @@ export const conflictResponse = async (message: string) => {
         message: message || "Conflict"
     }
 }
+
+export const unauthorizedResponse = async (message: string) => {
+    return {
+        status: Status.false,
+        statusCode: 401,
+        data: null,
+        message: message || "Unauthorized"
+    }
+}

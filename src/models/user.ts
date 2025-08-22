@@ -1,5 +1,10 @@
 import jwt, { type JwtPayload } from 'jsonwebtoken'
 
+export enum UserRole {
+    USER = "User",
+    ADMIN = "Admin"
+}
+
 export interface UserRegistrationInterface {
     user_name: string,
     user_username: string,
@@ -12,6 +17,7 @@ export interface UserLoginInterface {
     user_username: string,
     user_email: string,
     user_password: string,
+    user_role: UserRole
 }
 
 export interface UserDataPayload extends jwt.JwtPayload {
