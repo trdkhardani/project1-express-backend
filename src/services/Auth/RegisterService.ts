@@ -4,7 +4,7 @@ import jwt, { type JwtPayload } from 'jsonwebtoken'
 import type { UserDataPayload, UserRegistrationInterface } from '../../models/user';
 import { MailerUtils } from '../../utils/mailer.utils';
 import { Status, type ResponseInterface } from '../../models/response';
-import { badRequestResponse, conflictResponse, successResponse } from '../../utils/response.utils';
+import { badRequestResponse, conflictResponse, internalServerErrorResponse, successResponse } from '../../utils/response.utils';
 const prisma = new PrismaClient();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY as string
 
@@ -26,13 +26,9 @@ export async function verifyUser(tokenizedUserId: string):Promise<ResponseInterf
             data: null,
             message: `User ${user.user_username} is successfully verified`
         }
-    } catch(err) {
+    } catch(err: any) {
         console.error(err)
-        return {
-            status: Status.false,
-            data: null,
-            message: "Error"
-        }
+        return internalServerErrorResponse();
     }
 }
 
@@ -66,15 +62,15 @@ export async function register(userData: UserRegistrationInterface):Promise<Resp
             message: "Verification link successfully sent to your email"
         }
     } catch(err: any) {
-        console.error(err)
         if(err.code === "P2002"){
-            return await conflictResponse("Email or username already exists")
-        } else {
-            return {
-            status: Status.false,
-            data: null,
-            message: "Error"
+            if(err.meta.target[0] === "user_username") {
+                return await conflictResponse("Username already exists")
+            } else {
+                return await conflictResponse("Email already exists")
             }
+        } else {
+            console.error(err)
+            return internalServerErrorResponse();
         }
     }
 };
@@ -104,10 +100,6 @@ export async function resendVerification(userEmail: string):Promise<ResponseInte
         return successResponse(null, `Verification email resent to ${user?.user_email}`)
     } catch(err: any) {
         console.error(err);
-        return {
-            status: Status.false,
-            data: null,
-            message: "Error"
-        }
+        return internalServerErrorResponse();
     }
 }

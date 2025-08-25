@@ -3,8 +3,8 @@ import { movieListQuery } from "../../generated/prisma/sql";
 import type { MovieSearch } from "../../models/movie";
 const prisma = new PrismaClient();
 
-import { Status, type ResponseInterface } from "../../models/response";
-import { successResponse } from "../../utils/response.utils";
+import { type ResponseInterface } from "../../models/response";
+import { internalServerErrorResponse, successResponse } from "../../utils/response.utils";
 
 export async function movieList(movieSearch: MovieSearch):Promise<ResponseInterface<{}>> {
     try {
@@ -13,25 +13,21 @@ export async function movieList(movieSearch: MovieSearch):Promise<ResponseInterf
             page,
             limit
         } = movieSearch
-
+    
         const currentDate = new Date();
         const movies = await prisma.$queryRawTyped(movieListQuery(currentDate, `%${search}%`, limit, page))
-
+    
         if(movies.length === 0) {
             return successResponse(null, "No movies found")
         }
-
+    
         return successResponse({
             movies,
             page,
             limit
         });
-    } catch(err: any) {
-        console.error(err)
-        return {
-            status: Status.false,
-            data: null,
-            message: "Error"
-        }
+    } catch(err) {
+        console.error(err);
+        return internalServerErrorResponse();
     }
 }

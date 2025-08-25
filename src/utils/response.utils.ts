@@ -35,3 +35,12 @@ export const unauthorizedResponse = async (message: string) => {
         message: message || "Unauthorized"
     }
 }
+
+export const internalServerErrorResponse = () => {
+    return {
+        status: Status.false,
+        statusCode: 500,
+        data: null,
+        message: "Internal Server Error"
+    }
+}

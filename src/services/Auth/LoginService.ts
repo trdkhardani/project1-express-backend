@@ -4,7 +4,7 @@ import { Status, type ResponseInterface } from "../../models/response";
 import { UserRole, type UserLoginInterface } from "../../models/user";
 import jwt, { type JwtPayload } from 'jsonwebtoken'
 import bcrypt from 'bcrypt';
-import { successResponse, unauthorizedResponse } from "../../utils/response.utils";
+import { internalServerErrorResponse, successResponse, unauthorizedResponse } from "../../utils/response.utils";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY as string
 
@@ -45,12 +45,7 @@ export async function loginUser(loginData: UserLoginInterface):Promise<ResponseI
         }, `Logged in as user ${user?.user_username}`)
     } catch(err: any) {
         console.error(err)
-        return {
-            status: Status.false,
-            statusCode: 418,
-            data: null,
-            message: "Error"
-        }
+        return internalServerErrorResponse();
     }
 }
 
@@ -89,11 +84,6 @@ export async function loginAdmin(loginData: UserLoginInterface): Promise<Respons
         }, `Logged in as Admin ${admin?.admin_username}`)
     } catch(err: any) {
         console.error(err)
-        return {
-            status: Status.false,
-            statusCode: 418,
-            data: null,
-            message: err.message
-        }
+        return internalServerErrorResponse();
     }
 }
