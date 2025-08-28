@@ -13,3 +13,25 @@ export async function showtimeSeats(req: Request, res: Response, next: NextFunct
         next(err)
     }
 }
+
+export async function pickSeat(req: Request, res: Response, next: NextFunction) {
+    try {
+        const showtimeId = req.params.showtimeId as string
+        const {
+            seat_count,
+            user_id,
+            seats,
+        } = req.body
+        
+        const response = await SelectSeatService.selectSeat({
+            showtimeId: showtimeId, 
+            selectedSeats: seats, 
+            userId: user_id, 
+            seatCount: seat_count
+        })
+
+        return res.status(Number(response.statusCode)).json(response)
+    } catch(err: any) {
+        next(err)
+    }
+}
