@@ -101,6 +101,7 @@ model Booking {
   user_id String
   booking_payment_status PaymentStatus
   booking_payment_method String?
+  booking_invoice_url String?
   booking_date_created DateTime @default(now())
   showtime Showtime @relation(fields: [showtime_id], references: [showtime_id], onDelete: Cascade)
   user User @relation(fields: [user_id], references: [user_id], onDelete: Cascade)

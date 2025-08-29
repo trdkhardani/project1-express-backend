@@ -9,6 +9,15 @@ export const successResponse = async (data: any, message?: string) => {
     }
 }
 
+export const acceptedResponse = async (message?: string) => {
+    return {
+        status: Status.true,
+        statusCode: 202,
+        data: null,
+        message: message || "The resource is still being processed"
+    }
+}
+
 export const badRequestResponse = async (message: string) => {
     return {
         status: Status.false,

@@ -3,7 +3,7 @@ import { Status, type ResponseInterface } from "../models/response.js";
 
 export const index = (req: Request, res: Response, next: NextFunction) => {
     try {
-        const response: ResponseInterface = {
+        const response = {
             status: Status.true,
             data: null,
             message: "It works!"
