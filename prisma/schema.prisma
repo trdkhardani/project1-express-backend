@@ -30,6 +30,7 @@ model Cinema_Chain {
   cinema_chain_id String @id @default(uuid())
   cinema_chain_brand String
   cinema_chain_logo String
+  cinema_chain_stripe_account_id String?
   admin Admin[]
   theater Theater[]
 
@@ -125,7 +126,7 @@ model Ticket {
   ticket_id String @id @default(uuid())
   booking_seat_id String
   ticket_issued_at DateTime @default(now())
-  ticket_qr_code String
+  ticket_qr_code Bytes?
   ticket_status TicketStatus
   booking_seat BookingSeat @relation(fields: [booking_seat_id], references: [booking_seat_id], onDelete: Cascade)
 

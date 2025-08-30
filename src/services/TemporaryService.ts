@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient, TicketStatus } from "../generated/prisma";
 const prisma = new PrismaClient()
 import type { ResponseInterface } from "../models/response";
 import { MailerUtils } from "../utils/mailer.utils";
@@ -28,8 +28,24 @@ export class TemporaryService {
                             user_email: true,
                             user_name: true
                         }
+                    },
+                    booking_seat: {
+                        select: {
+                            booking_seat_id: true
+                        }
                     }
                 }
+            })
+            
+            const ticketsData = updateBooking.booking_seat.map((data) => {
+                return {
+                    booking_seat_id: data.booking_seat_id,
+                    ticket_status: TicketStatus.VALID
+                }
+            })
+            
+            const tickets = await prisma.ticket.createMany({
+                data: ticketsData
             })
 
             MailerUtils.sendInvoiceEmail({
@@ -38,7 +54,7 @@ export class TemporaryService {
                 invoiceLink: updateBooking.booking_invoice_url as string
             })
 
-            return successResponse(updateBooking, "Payment successful!")
+            return successResponse({updateBooking, tickets}, "Payment successful!")
         } catch(err) {
             console.error(err)
             return internalServerErrorResponse();
