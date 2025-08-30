@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import dotenv from 'dotenv'
-import type { StripeCheckoutData } from "../models/payment";
+import type { StripeAccountCreationData, StripeCheckoutData } from "../models/stripe";
 dotenv.config()
 
 const STRIPE_TEST_SECRET_KEY = process.env.STRIPE_TEST_SECRET_KEY as string
@@ -9,13 +9,13 @@ const PORT = process.env.PORT
 
 export class StripeInstance {
     static stripe = new Stripe(STRIPE_TEST_SECRET_KEY)
-    static async createStripeAccount(businessName: string, country?: string, defaultCurrency?: string) {
+    static async createStripeAccount(accountCreationData: StripeAccountCreationData) {
         const account = await this.stripe.accounts.create({
             business_profile: {
-                name: businessName
+                name: `Moovee-Oh - ${accountCreationData.businessName}`
             },
-            country: country || 'sg',
-            default_currency: defaultCurrency || 'sgd',
+            country: accountCreationData.country || 'sg',
+            default_currency: accountCreationData.defaultCurrency || 'sgd',
             controller: {
                 losses: {
                     payments: 'stripe'
@@ -75,10 +75,10 @@ export class StripeInstance {
                 invoice_data: {
                     description: `This invoice serves as proof of your movie ticket purchase with Moovee-Oh.`,
                     issuer: {
-                        type: 'self'
+                        type: 'account'
                     },
                     rendering_options: {
-                        template: "inrtem_1S1MaWQ6EIjjIRLbel2F5LMW"
+                        template: "inrtem_1S1objL9krw6jmcB47b44bTn"
                     },
                     // account_tax_ids: ['txr_1S1RTlQ6EIjjIRLbO9eKkcb8'],
                     custom_fields: [
@@ -109,7 +109,7 @@ export class StripeInstance {
             submit_type: "book",
             mode: 'payment',
             payment_intent_data: {
-                // application_fee_amount: stripeCheckoutData.applicationFee,
+                application_fee_amount: stripeCheckoutData.applicationFee,
                 receipt_email: stripeCheckoutData.userEmail
             },
             customer_email: stripeCheckoutData.userEmail,

@@ -31,6 +31,7 @@ model Cinema_Chain {
   cinema_chain_brand String
   cinema_chain_logo String
   cinema_chain_stripe_account_id String?
+  cinema_chain_stripe_account_url String?
   admin Admin[]
   theater Theater[]
 

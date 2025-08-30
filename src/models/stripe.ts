@@ -1,3 +1,9 @@
+export interface StripeAccountCreationData {
+    businessName: string, 
+    country?: string, 
+    defaultCurrency?: string
+}
+
 export interface StripeCheckoutData {
     bookingId: string,
     amount: number, 

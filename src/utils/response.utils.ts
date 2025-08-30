@@ -45,11 +45,20 @@ export const unauthorizedResponse = async (message: string) => {
     }
 }
 
-export const internalServerErrorResponse = () => {
+export const internalServerErrorResponse = (message?: string) => {
     return {
         status: Status.false,
         statusCode: 500,
         data: null,
-        message: "Internal Server Error"
+        message: message || "Internal Server Error"
+    }
+}
+
+export const anyErrorResponse = (statusCode: number, message?: string) => {
+    return {
+        status: Status.false,
+        statusCode: statusCode,
+        data: null,
+        message: message || "Error"
     }
 }
