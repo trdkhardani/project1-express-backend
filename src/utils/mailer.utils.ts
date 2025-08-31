@@ -73,14 +73,14 @@ export class MailerUtils {
             <p>Thanks for your purchase! Your invoice is now available. You can view and download it securely using the button below:</p>
             
             <div style="text-align:center; margin:30px 0;">
-                <a href="${emailData.invoiceLink}" 
+                <a href="${BASE_URL}:${PORT}/${emailData.invoiceEndpoint}" 
                 style="background:#e50914; color:#fff; text-decoration:none; padding:12px 24px; border-radius:6px; font-weight:bold;">
                 View My Invoice
                 </a>
             </div>
 
             <p>If the button above doesn’t work, copy and paste this link into your browser:</p>
-            <p style="word-break:break-all; color:#555;">${emailData.invoiceLink}</p>
+            <p style="word-break:break-all; color:#555;">${BASE_URL}:${PORT}/${emailData.invoiceEndpoint}</p>
             
             <hr style="margin:30px 0; border:none; border-top:1px solid #eee;" />
             <p style="font-size:12px; color:#888;">

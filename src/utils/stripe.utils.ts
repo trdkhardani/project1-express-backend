@@ -54,14 +54,15 @@ export class StripeInstance {
                         currency: 'idr',
                         product_data: {
                             name: `Ticket(s) for ${stripeCheckoutData.movieTitle} Movie`,
-                            description: `${stripeCheckoutData.quantity} ticket(s) in ${stripeCheckoutData.theater} theater | Seat(s): ${stripeCheckoutData.seats}`,
+                            description: `${stripeCheckoutData.quantity} ticket(s) in ${stripeCheckoutData.theater} - ${stripeCheckoutData.cinemaChain} theater | Seat(s): ${stripeCheckoutData.seats}`,
                             metadata: {
                                 movie_title: stripeCheckoutData.movieTitle,
                                 theater: stripeCheckoutData.theater,
+                                cinema_chain: stripeCheckoutData.cinemaChain,
                                 seats: stripeCheckoutData.seats
                             }
                         },
-                        unit_amount: stripeCheckoutData.amount
+                        unit_amount: stripeCheckoutData.amount * 100 // idk why it have to be multiplied by 100 to have correct amount per unit???
                     },
                     quantity: stripeCheckoutData.quantity,
                 },
@@ -75,11 +76,12 @@ export class StripeInstance {
                 invoice_data: {
                     description: `This invoice serves as proof of your movie ticket purchase with Moovee-Oh.`,
                     issuer: {
-                        type: 'account'
+                        type: 'self'
                     },
-                    rendering_options: {
-                        template: "inrtem_1S1objL9krw6jmcB47b44bTn"
-                    },
+                    // rendering_options: {
+                    //     template: "inrtem_1S1objL9krw6jmcB47b44bTn"
+                    // },
+                    footer: `🎬 Thank you for choosing Moovee-Oh! \n Enjoy the show, and we hope to see you again soon.`,
                     // account_tax_ids: ['txr_1S1RTlQ6EIjjIRLbO9eKkcb8'],
                     custom_fields: [
                         {
@@ -92,7 +94,7 @@ export class StripeInstance {
                         },
                         {
                             name: 'Theater',
-                            value: `${stripeCheckoutData.theater}, ${stripeCheckoutData.theaterCity}`
+                            value: `${stripeCheckoutData.theater} - ${stripeCheckoutData.cinemaChain}, ${stripeCheckoutData.theaterCity}`
                         },
                         {
                             name: 'Seat(s)',
@@ -105,11 +107,17 @@ export class StripeInstance {
                 }
             },
             customer_creation: 'always',
-            payment_method_configuration: "pmc_1S1GqvQ6EIjjIRLbqXvsvVNR",
+            // payment_method_configuration: "pmc_1S1GqvQ6EIjjIRLbqXvsvVNR",
+            payment_method_types: [
+                'card',
+                'samsung_pay',
+                'link',
+                // 'paypal'
+            ],
             submit_type: "book",
             mode: 'payment',
             payment_intent_data: {
-                application_fee_amount: stripeCheckoutData.applicationFee,
+                application_fee_amount: stripeCheckoutData.applicationFee * 100,
                 receipt_email: stripeCheckoutData.userEmail
             },
             customer_email: stripeCheckoutData.userEmail,
@@ -118,24 +126,26 @@ export class StripeInstance {
             }
             },
             {
-                stripeAccount: "acct_1S1GqIQ6EIjjIRLb",
+                stripeAccount: stripeCheckoutData.stripeAccountId,
             })
 
             return session;
     }
 
-    static async findInvoice(bookingId: string) {
+    static async findInvoice(bookingId: string, stripeAccountId: string) {
         const invoice = await this.stripe.invoices.search({
-            query: `metadata['booking_id']:"${bookingId}"`
+            query: `metadata['booking_id']:"${bookingId}"`,
+        }, {
+            stripeAccount: stripeAccountId
         })
 
         return invoice;
     }
 
-    static async listAccount() {
-        const accounts = await this.stripe.accounts.list()
+    static async accountInfo(stripeAccountId: string) {
+        const account = await this.stripe.accounts.retrieve(stripeAccountId)
 
-        return accounts;
+        return account;
     }
 
     static async deleteAccount(accountId: string) {

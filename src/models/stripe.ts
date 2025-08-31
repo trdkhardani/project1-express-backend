@@ -13,5 +13,7 @@ export interface StripeCheckoutData {
     movieTitle: string, 
     theater: string,
     theaterCity: string,
+    cinemaChain: string,
+    stripeAccountId: string,
     seats: string
 }

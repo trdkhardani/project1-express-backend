@@ -89,4 +89,31 @@ export class StripeAccountService {
             return internalServerErrorResponse();
         }
     }
+
+    static async getAccountInfo(adminId: string):Promise<ResponseInterface<{}>> {
+        try {
+            const admin = await prisma.admin.findUnique({
+                select: {
+                    cinema_chain: {
+                        select: {
+                            cinema_chain_stripe_account_id: true
+                        }
+                    }
+                },
+                where: {
+                    admin_id: adminId
+                }
+            })
+
+            const account = await StripeInstance.accountInfo(admin?.cinema_chain.cinema_chain_stripe_account_id!)
+
+            return successResponse(account)
+        } catch(err: any) {
+            console.error(err);
+            if(err.statusCode) {
+                return anyErrorResponse(err.statusCode, err.message)
+            }
+            return internalServerErrorResponse();
+        }
+    }
 }

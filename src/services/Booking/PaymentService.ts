@@ -28,7 +28,13 @@ export async function checkout(bookingId: string):Promise<ResponseInterface<{}>>
                         theater: {
                             select: {
                                 theater_location: true,
-                                theater_city: true
+                                theater_city: true,
+                                cinema_chain: {
+                                    select: {
+                                        cinema_chain_brand: true,
+                                        cinema_chain_stripe_account_id: true,
+                                    }
+                                }
                             }
                         },
                         showtime_price: true
@@ -52,7 +58,7 @@ export async function checkout(bookingId: string):Promise<ResponseInterface<{}>>
         }
 
         const bookingData = {
-            amount: booking?.showtime.showtime_price * 100, // idk why it have to be multiplied by 100 to have correct amount per unit???
+            amount: booking?.showtime.showtime_price,
             quantity: booking?.booking_seat.length,
             get appFee() {
                 return this.amount * 0.05
@@ -64,13 +70,15 @@ export async function checkout(bookingId: string):Promise<ResponseInterface<{}>>
 
         const payment = await StripeInstance.createShowtimeCheckoutSession({
             bookingId: booking.booking_id,
-            amount: Number(bookingData.amount),
+            amount: bookingData.amount,
             quantity: bookingData.quantity,
             applicationFee:  bookingData.appFee,
             userEmail: booking?.user.user_email,
             movieTitle: booking?.showtime.movie.movie_title,
             theater: booking?.showtime.theater.theater_location,
             theaterCity: booking.showtime.theater.theater_city,
+            cinemaChain: booking.showtime.theater.cinema_chain.cinema_chain_brand,
+            stripeAccountId: booking.showtime.theater.cinema_chain.cinema_chain_stripe_account_id!,
             seats: bookingData.bookedSeats
         })
         .then((data) => {
@@ -89,7 +97,28 @@ export async function checkout(bookingId: string):Promise<ResponseInterface<{}>>
 
 export async function invoiceUrl(bookingId: string):Promise<ResponseInterface<{}>> {
     try {
-        const invoiceUrl = await StripeInstance.findInvoice(bookingId)
+        const booking = await prisma.booking.findUnique({
+            select: {
+                showtime: {
+                    select: {
+                        theater: {
+                            select: {
+                                cinema_chain: {
+                                    select: {
+                                        cinema_chain_stripe_account_id: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            where: {
+                booking_id: bookingId
+            }
+        })
+
+        const invoiceUrl = await StripeInstance.findInvoice(bookingId, booking?.showtime.theater.cinema_chain.cinema_chain_stripe_account_id!)
         .then((data: any) => {
             return data
         })

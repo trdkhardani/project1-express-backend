@@ -8,5 +8,5 @@ export interface UserVerificationEmail extends UserDataEmail {
 }
 
 export interface InvoiceEmail extends UserDataEmail {
-    invoiceLink: string
+    invoiceEndpoint: string
 }

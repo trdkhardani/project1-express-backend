@@ -31,4 +31,18 @@ export class StripeAccountController {
             next(err)
         }
     }
+
+    static async getAccountInfo(req: Request, res: Response, next: NextFunction) {
+        try {
+            const {
+                admin_id,
+            } = req.body
+
+            const response = await StripeAccountService.getAccountInfo(admin_id)
+
+            return res.status(Number(response.statusCode)).json(response)
+        } catch(err) {
+            next(err)
+        }
+    }
 }

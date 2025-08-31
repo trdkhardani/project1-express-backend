@@ -3,18 +3,16 @@ const prisma = new PrismaClient()
 import type { ResponseInterface } from "../models/response";
 import { MailerUtils } from "../utils/mailer.utils";
 import { internalServerErrorResponse, successResponse } from "../utils/response.utils";
-const BASE_URL = process.env.BASE_URL as string;
-const PORT = process.env.PORT as string;
 
 export class TemporaryService {
     static async paymentSuccess(bookingId: string):Promise<ResponseInterface<{}>> {
         try {
-            const shortenedInvoiceUrl = `${BASE_URL}:${PORT}/api/v1/booking/invoice/${bookingId}`
+            const shortenedInvoiceEndpoint = `api/v1/booking/invoice/${bookingId}`
 
             const updateBooking = await prisma.booking.update({
                 data: {
                     booking_payment_status: "SUCCESSFUL",
-                    booking_invoice_url: shortenedInvoiceUrl
+                    booking_invoice_endpoint: shortenedInvoiceEndpoint
                 },
                 where: {
                     booking_id: bookingId
@@ -22,7 +20,7 @@ export class TemporaryService {
                 select: {
                     booking_id: true,
                     booking_payment_status: true,
-                    booking_invoice_url: true,
+                    booking_invoice_endpoint: true,
                     user: {
                         select: {
                             user_email: true,
@@ -51,7 +49,7 @@ export class TemporaryService {
             MailerUtils.sendInvoiceEmail({
                 userEmail: updateBooking.user.user_email,
                 userName: updateBooking.user.user_name,
-                invoiceLink: updateBooking.booking_invoice_url as string
+                invoiceEndpoint: updateBooking.booking_invoice_endpoint as string
             })
 
             return successResponse({updateBooking, tickets}, "Payment successful!")
