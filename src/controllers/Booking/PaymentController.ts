@@ -1,7 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import * as PaymentService from '../../services/Booking/PaymentService'
+import type { AuthenticatedRequest } from "../../models/auth";
 
-export async function checkout(req: Request, res: Response, next: NextFunction) {
+export async function checkout(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
         // const theaterId = req.params.theaterId as string
         const bookingId = req.params.bookingId as string
@@ -14,7 +15,7 @@ export async function checkout(req: Request, res: Response, next: NextFunction) 
     }
 }
 
-export async function invoiceUrl(req: Request, res: Response, next: NextFunction) {
+export async function invoiceUrl(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
         const bookingId = req.params.bookingId as string;
 

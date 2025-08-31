@@ -1,7 +1,8 @@
 import { PrismaClient } from "../../generated/prisma";
 const prisma = new PrismaClient();
 import { Status, type ResponseInterface } from "../../models/response";
-import { UserRole, type UserLoginInterface } from "../../models/user";
+import { UserRole } from "../../models/user";
+import { type UserLoginInterface } from "../../models/auth";
 import jwt, { type JwtPayload } from 'jsonwebtoken'
 import bcrypt from 'bcrypt';
 import { internalServerErrorResponse, successResponse, unauthorizedResponse } from "../../utils/response.utils";
@@ -35,7 +36,7 @@ export async function loginUser(loginData: UserLoginInterface):Promise<ResponseI
             return unauthorizedResponse("Invalid email/username or password")
         }
 
-        const token = jwt.sign({user_id: user?.user_id, user_username: user?.user_username, user_email: user?.user_email, user_role: UserRole.USER}, JWT_SECRET_KEY, {
+        const token = jwt.sign({user_id: user?.user_id, user_name: user.user_name, user_username: user?.user_username, user_email: user?.user_email, user_role: UserRole.USER}, JWT_SECRET_KEY, {
             expiresIn: '12h'
         })
 

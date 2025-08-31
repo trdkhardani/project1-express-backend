@@ -1,7 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
 import * as SelectSeatService from '../../services/Booking/SelectSeatService'
+import type { AuthenticatedRequest } from "../../models/auth";
 
-export async function showtimeSeats(req: Request, res: Response, next: NextFunction) {
+export async function showtimeSeats(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
         // const theaterId = req.params.theaterId as string
         const showtimeId = req.params.showtimeId as string
@@ -14,19 +15,20 @@ export async function showtimeSeats(req: Request, res: Response, next: NextFunct
     }
 }
 
-export async function pickSeat(req: Request, res: Response, next: NextFunction) {
+export async function pickSeat(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
+        const userId = req.user?.user_id as string;
+
         const showtimeId = req.params.showtimeId as string
         const {
             seat_count,
-            user_id,
             seats,
         } = req.body
         
         const response = await SelectSeatService.selectSeat({
             showtimeId: showtimeId, 
             selectedSeats: seats, 
-            userId: user_id, 
+            userId: userId, 
             seatCount: seat_count
         })
 

@@ -1,16 +1,18 @@
 import type { NextFunction, Request, Response } from "express";
 import { StripeAccountService } from "../../../services/Admin/Stripe/AccountService";
+import type { AuthenticatedRequest } from "../../../models/auth";
 
 export class StripeAccountController {
-    static async createAccount(req: Request, res: Response, next: NextFunction) {
+    static async createAccount(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
+            const adminId = req.admin?.admin_id as string
+            
             const {
-                admin_id,
                 country,
                 currency
             } = req.body
 
-            const response = await StripeAccountService.createAccount(admin_id, country, currency)
+            const response = await StripeAccountService.createAccount(adminId, country, currency)
 
             return res.status(Number(response.statusCode)).json(response)
         } catch(err) {
@@ -18,13 +20,11 @@ export class StripeAccountController {
         }
     }
 
-    static async createAccountLink(req: Request, res: Response, next: NextFunction) {
+    static async createAccountLink(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
-            const {
-                admin_id,
-            } = req.body
+            const adminId = req.admin?.admin_id as string
 
-            const response = await StripeAccountService.createAccountLink(admin_id)
+            const response = await StripeAccountService.createAccountLink(adminId)
 
             return res.status(Number(response.statusCode)).json(response)
         } catch(err) {
@@ -32,13 +32,11 @@ export class StripeAccountController {
         }
     }
 
-    static async getAccountInfo(req: Request, res: Response, next: NextFunction) {
+    static async getAccountInfo(req: AuthenticatedRequest, res: Response, next: NextFunction) {
         try {
-            const {
-                admin_id,
-            } = req.body
+            const adminId = req.admin?.admin_id as string
 
-            const response = await StripeAccountService.getAccountInfo(admin_id)
+            const response = await StripeAccountService.getAccountInfo(adminId)
 
             return res.status(Number(response.statusCode)).json(response)
         } catch(err) {

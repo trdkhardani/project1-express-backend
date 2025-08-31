@@ -1,7 +1,8 @@
 import { PrismaClient } from '../../generated/prisma';
 import bcrypt from 'bcrypt';
 import jwt, { type JwtPayload } from 'jsonwebtoken'
-import type { UserDataPayload, UserRegistrationInterface } from '../../models/user';
+import type { UserDataPayload } from '../../models/user';
+import { type UserRegistrationInterface } from '../../models/auth';
 import { MailerUtils } from '../../utils/mailer.utils';
 import { Status, type ResponseInterface } from '../../models/response';
 import { badRequestResponse, conflictResponse, internalServerErrorResponse, successResponse } from '../../utils/response.utils';

@@ -36,12 +36,21 @@ export const conflictResponse = async (message: string) => {
     }
 }
 
-export const unauthorizedResponse = async (message: string) => {
+export const unauthorizedResponse = async (message?: string) => {
     return {
         status: Status.false,
         statusCode: 401,
         data: null,
         message: message || "Unauthorized"
+    }
+}
+
+export const forbiddenResponse = async (message?: string) => {
+    return {
+        status: Status.false,
+        statusCode: 403,
+        data: null,
+        message: message || "Forbidden"
     }
 }
 
