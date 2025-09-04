@@ -17,7 +17,7 @@ app.use("/", IndexRoutes);
 app.use("/api/v1/admin", AuthMiddleware.admin, AdminRoutes);
 app.use("/api/v1/auth", AuthRoutes)
 app.use("/api/v1/movie", MovieRoutes)
-app.use("/api/v1/booking", AuthMiddleware.user, BookingRoutes)
+app.use("/api/v1/bookings", AuthMiddleware.user, BookingRoutes)
 app.use("/temporary", TemporaryRoutes)
 
 // Error Handler
