@@ -2,12 +2,17 @@ import type { Request, Response, NextFunction } from "express";
 import * as PaymentService from '../../services/Booking/PaymentService'
 import type { AuthenticatedRequest } from "../../models/auth";
 
+export enum PaymentGateway {
+    STRIPE = "STRIPE",
+    MIDTRANS = "MIDTRANS"
+}
+
 export async function checkout(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
-        // const theaterId = req.params.theaterId as string
+        const payment_gateway = req.body.payment_gateway as PaymentGateway
         const bookingId = req.params.bookingId as string
 
-        const response = await PaymentService.checkout(bookingId)
+        const response = await PaymentService.checkout(bookingId, payment_gateway)
 
         return res.json(response)
     } catch(err: any) {

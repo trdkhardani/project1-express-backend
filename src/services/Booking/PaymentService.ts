@@ -1,10 +1,12 @@
+import { PaymentGateway } from "../../controllers/Booking/PaymentController";
 import { PrismaClient } from "../../generated/prisma";
 const prisma = new PrismaClient();
 import type { ResponseInterface } from "../../models/response";
+import { MidtransInstance } from "../../utils/midtrans.utils";
 import { acceptedResponse, internalServerErrorResponse, successResponse } from "../../utils/response.utils";
 import { StripeInstance } from "../../utils/stripe.utils";
 
-export async function checkout(bookingId: string):Promise<ResponseInterface<{}>> {
+export async function checkout(bookingId: string, paymentGateway: PaymentGateway):Promise<ResponseInterface<{}>> {
     try {
         const booking = await prisma.booking.findUnique({
             where: {
@@ -20,6 +22,7 @@ export async function checkout(bookingId: string):Promise<ResponseInterface<{}>>
                 },
                 showtime: {
                     select: {
+                        showtime_id: true,
                         movie: {
                             select: {
                                 movie_title: true
@@ -68,27 +71,42 @@ export async function checkout(bookingId: string):Promise<ResponseInterface<{}>>
             }).join(", ")
         }
 
-        const payment = await StripeInstance.createShowtimeCheckoutSession({
-            bookingId: booking.booking_id,
-            amount: bookingData.amount,
-            quantity: bookingData.quantity,
-            applicationFee:  bookingData.appFee,
-            userEmail: booking?.user.user_email,
-            movieTitle: booking?.showtime.movie.movie_title,
-            theater: booking?.showtime.theater.theater_location,
-            theaterCity: booking.showtime.theater.theater_city,
-            cinemaChain: booking.showtime.theater.cinema_chain.cinema_chain_brand,
-            stripeAccountId: booking.showtime.theater.cinema_chain.cinema_chain_stripe_account_id!,
-            seats: bookingData.bookedSeats
-        })
-        .then((data) => {
-            return data;
-        })
-        .catch((err) => {
-            throw new Error(err)
-        })
+        if(paymentGateway === PaymentGateway.STRIPE) {
+            const payment = await StripeInstance.createShowtimeCheckoutSession({
+                bookingId: booking.booking_id,
+                amount: bookingData.amount,
+                quantity: bookingData.quantity,
+                applicationFee:  bookingData.appFee,
+                userEmail: booking?.user.user_email,
+                movieTitle: booking?.showtime.movie.movie_title,
+                theater: booking?.showtime.theater.theater_location,
+                theaterCity: booking.showtime.theater.theater_city,
+                cinemaChain: booking.showtime.theater.cinema_chain.cinema_chain_brand,
+                stripeAccountId: booking.showtime.theater.cinema_chain.cinema_chain_stripe_account_id!,
+                seats: bookingData.bookedSeats
+            })
+            .then((data) => {
+                return data;
+            })
+            .catch((err) => {
+                throw new Error(err)
+            })
+    
+            return successResponse(payment.url, "Payment initiated")
+        } else {
+            const payment = await MidtransInstance.createShowtimeCheckoutSnap({
+                cinemaChain: booking.showtime.theater.cinema_chain.cinema_chain_brand,
+                bookingId: booking.booking_id,
+                amount: bookingData.amount,
+                movieTitle: booking?.showtime.movie.movie_title,
+                seats: bookingData.bookedSeats,
+                showtimeId: booking.showtime.showtime_id,
+                quantity: bookingData.quantity,
+                userEmail: booking.user.user_email
+            })
 
-        return successResponse(payment.url, "Payment initiated")
+            return successResponse(payment, "Payment initiated")
+        }
     } catch(err) {
         console.error(err)
         return internalServerErrorResponse();
