@@ -1,11 +1,30 @@
-import { PrismaClient } from "../../generated/prisma";
+import { PaymentStatus, PrismaClient } from "../../generated/prisma";
 const prisma = new PrismaClient();
 import type { ResponseInterface } from "../../models/response";
-import { internalServerErrorResponse, successResponse } from "../../utils/response.utils";
+import { badRequestResponse, internalServerErrorResponse, successResponse } from "../../utils/response.utils";
 
 export class ShowBookingService {
-    static async bookingList(bookingId: string, userId: string, page: number, limit: number):Promise<ResponseInterface<{}>> {
+    static async bookingList(bookingId: string, userId: string, page: number, limit: number, paymentStatus: PaymentStatus):Promise<ResponseInterface<{}>> {
         try {
+            let whereClause: any = {
+                booking_id: bookingId,
+                user_id: userId,
+            }
+            if(paymentStatus) {
+                if(paymentStatus.toUpperCase() === PaymentStatus.SUCCESSFUL)
+                    whereClause.booking_payment_status = "SUCCESSFUL"
+                else if(paymentStatus.toUpperCase() === PaymentStatus.PENDING)
+                    whereClause.booking_payment_status = "PENDING"
+                else if(paymentStatus.toUpperCase() === PaymentStatus.EXPIRED)
+                    whereClause.booking_payment_status = "EXPIRED"
+                else if(paymentStatus.toUpperCase() === PaymentStatus.FAILED)
+                    whereClause.booking_payment_status = "FAILED"
+                else
+                    whereClause.booking_payment_status = "CANCELLED"
+            } else {
+                return badRequestResponse("Please specify the payment_status")
+            }
+
             const bookings = await prisma.booking.findMany({
                 select: {
                     showtime: {
@@ -31,21 +50,7 @@ export class ShowBookingService {
                     },
                     booking_payment_status: true
                 },
-                where: {
-                    booking_id: bookingId,
-                    user_id: userId,
-                    OR: [
-                        {
-                            booking_payment_status: "PENDING"
-                        },
-                        {
-                            booking_payment_status: "CANCELLED"
-                        },
-                        {
-                            booking_payment_status: "EXPIRED"
-                        },
-                    ]
-                },
+                where: whereClause,
                 skip: (page - 1) * limit,
                 take: limit
             })
