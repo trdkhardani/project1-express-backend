@@ -46,7 +46,7 @@ export class StripeInstance {
 
     static async createShowtimeCheckoutSession(stripeCheckoutData: StripeCheckoutData) {
         const session = await this.stripe.checkout.sessions.create({
-            success_url: `${BASE_URL}:${PORT}/temporary/stripe/payment-success/${stripeCheckoutData.bookingId}`,
+            success_url: `${BASE_URL}:${PORT}/temporary/stripe/payment-success/${stripeCheckoutData.bookingId}?payment_gateway=stripe`,
             cancel_url: `${BASE_URL}:${PORT}/temporary/stripe/cancel-payment/${stripeCheckoutData.bookingId}`,
             line_items: [
                 {

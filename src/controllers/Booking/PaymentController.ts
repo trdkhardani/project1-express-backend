@@ -11,9 +11,9 @@ export async function checkout(req: AuthenticatedRequest, res: Response, next: N
     try {
         const payment_gateway = req.body.payment_gateway as PaymentGateway
         const bookingId = req.params.bookingId as string
-
+        
         const response = await PaymentService.checkout(bookingId, payment_gateway)
-
+        
         return res.json(response)
     } catch(err: any) {
         next(err)
@@ -22,9 +22,10 @@ export async function checkout(req: AuthenticatedRequest, res: Response, next: N
 
 export async function invoiceUrl(req: AuthenticatedRequest, res: Response, next: NextFunction) {
     try {
+        const payment_gateway = req.body.payment_gateway as PaymentGateway
         const bookingId = req.params.bookingId as string;
 
-        const response = await PaymentService.invoiceUrl(bookingId)
+        const response = await PaymentService.invoiceUrl(bookingId, payment_gateway)
 
         if(response.statusCode === 202) {
             return res.status(response.statusCode).json(response)

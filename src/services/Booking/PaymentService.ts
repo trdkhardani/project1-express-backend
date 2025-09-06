@@ -2,6 +2,7 @@ import { PaymentGateway } from "../../controllers/Booking/PaymentController";
 import { PrismaClient } from "../../generated/prisma";
 const prisma = new PrismaClient();
 import type { ResponseInterface } from "../../models/response";
+import { DateTimeUtils } from "../../utils/datetime.utils";
 import { MidtransInstance } from "../../utils/midtrans.utils";
 import { acceptedResponse, internalServerErrorResponse, successResponse } from "../../utils/response.utils";
 import { StripeInstance } from "../../utils/stripe.utils";
@@ -15,9 +16,12 @@ export async function checkout(bookingId: string, paymentGateway: PaymentGateway
             },
             select: {
                 booking_id: true,
+                booking_date_created: true,
                 user: {
                     select: {
-                        user_email: true
+                        user_id: true,
+                        user_email: true,
+                        user_name: true
                     }
                 },
                 showtime: {
@@ -102,7 +106,11 @@ export async function checkout(bookingId: string, paymentGateway: PaymentGateway
                 seats: bookingData.bookedSeats,
                 showtimeId: booking.showtime.showtime_id,
                 quantity: bookingData.quantity,
-                userEmail: booking.user.user_email
+                userId: booking.user.user_id,
+                userName: booking.user.user_name,
+                userEmail: booking.user.user_email,
+                bookingDate: booking.booking_date_created.toISOString(),
+                bookingDueDate: DateTimeUtils.modifyHours(booking.booking_date_created.toISOString(), 24)
             })
 
             return successResponse(payment, "Payment initiated")
@@ -113,7 +121,7 @@ export async function checkout(bookingId: string, paymentGateway: PaymentGateway
     }
 }
 
-export async function invoiceUrl(bookingId: string):Promise<ResponseInterface<{}>> {
+export async function invoiceUrl(bookingId: string, paymentGateway: PaymentGateway):Promise<ResponseInterface<{}>> {
     try {
         const booking = await prisma.booking.findUnique({
             select: {
@@ -136,10 +144,13 @@ export async function invoiceUrl(bookingId: string):Promise<ResponseInterface<{}
             }
         })
 
-        const invoiceUrl = await StripeInstance.findInvoice(bookingId, booking?.showtime.theater.cinema_chain.cinema_chain_stripe_account_id!)
-        .then((data: any) => {
-            return data
-        })
+        let invoiceUrl;
+        if(paymentGateway.toUpperCase() === PaymentGateway.STRIPE) {
+            invoiceUrl = await StripeInstance.findInvoice(bookingId, booking?.showtime.theater.cinema_chain.cinema_chain_stripe_account_id!)
+            .then((data: any) => {
+                return data
+            })
+        }
 
         if(invoiceUrl.data.length === 0) {
             return acceptedResponse("The invoice is either still being processed or does not exist.")

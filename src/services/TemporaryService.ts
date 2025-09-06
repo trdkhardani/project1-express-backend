@@ -1,3 +1,4 @@
+import type { PaymentGateway } from "../controllers/Booking/PaymentController";
 import { PrismaClient, TicketStatus } from "../generated/prisma";
 const prisma = new PrismaClient()
 import type { ResponseInterface } from "../models/response";
@@ -5,14 +6,15 @@ import { MailerUtils } from "../utils/mailer.utils";
 import { internalServerErrorResponse, successResponse } from "../utils/response.utils";
 
 export class TemporaryService {
-    static async paymentSuccess(bookingId: string):Promise<ResponseInterface<{}>> {
+    static async paymentSuccess(bookingId: string, paymentGateway: PaymentGateway):Promise<ResponseInterface<{}>> {
         try {
-            const shortenedInvoiceEndpoint = `api/v1/booking/invoice/${bookingId}`
+            const invoiceEndpoint = `api/v1/booking/invoice/${bookingId}?payment_gateway=${paymentGateway}`
 
             const updateBooking = await prisma.booking.update({
                 data: {
                     booking_payment_status: "SUCCESSFUL",
-                    booking_invoice_endpoint: shortenedInvoiceEndpoint
+                    booking_payment_method: paymentGateway.toUpperCase(),
+                    booking_invoice_endpoint: invoiceEndpoint
                 },
                 where: {
                     booking_id: bookingId
@@ -20,6 +22,7 @@ export class TemporaryService {
                 select: {
                     booking_id: true,
                     booking_payment_status: true,
+                    booking_payment_method: true,
                     booking_invoice_endpoint: true,
                     user: {
                         select: {

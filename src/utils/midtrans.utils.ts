@@ -1,6 +1,7 @@
 import axios from 'axios'
 import midtransClient from 'midtrans-client';
 import type { MidtransCheckoutData } from '../models/midtrans';
+import { DateTimeUtils } from './datetime.utils';
 const {
     BASE_URL,
     PORT,
@@ -52,9 +53,12 @@ export class MidtransInstance {
     }
 
     static async createShowtimeCheckoutSnap(checkoutData: MidtransCheckoutData) {
-        let parameters = {
+        // const orderId = `${checkoutData.cinemaChain}-${checkoutData.bookingId}`
+        // const orderId = `ORD_${checkoutData.bookingId}`
+
+        let transactionParams = {
             transaction_details: {
-                order_id: `${checkoutData.cinemaChain}-${checkoutData.bookingId}`,
+                order_id: checkoutData.bookingId,
                 gross_amount: checkoutData.amount * checkoutData.quantity
             },
             item_details: [
@@ -71,7 +75,7 @@ export class MidtransInstance {
                 email: checkoutData.userEmail
             },
             callbacks: {
-                finish: `${BASE_URL}:${PORT}/temporary/stripe/payment-success/${checkoutData.bookingId}`,
+                finish: `${BASE_URL}:${PORT}/temporary/stripe/payment-success/${checkoutData.bookingId}?payment_gateway=midtrans`,
             },
             expiry: {
                 duration: 1,
@@ -82,9 +86,48 @@ export class MidtransInstance {
                 unit: "hour",
             },
         }
-        const transaction = await snap.createTransaction(parameters)
-        // (parameters, "v1/transactions")
-        
-        return transaction
+        const transaction = await snap.createTransaction(transactionParams)
+
+        let invoiceParams = {
+            order_id: checkoutData.bookingId,
+            invoice_number: `INV_${checkoutData.bookingId}`,
+            invoice_date: checkoutData.bookingDate,
+            due_date: checkoutData.bookingDueDate,
+            invoice_title: `Moovee-Oh | Invoice`,
+            invoice_paid_title: `Moovee-Oh | Receipt`,
+            customer_details: {
+                id: checkoutData.userId,
+                name: checkoutData.userName,
+                email: checkoutData.userEmail
+            },
+            item_details: [
+                {
+                    item_id: checkoutData.showtimeId.slice(0, 30),
+                    description: `${checkoutData.movieTitle} (${checkoutData.seats})`,
+                    quantity: checkoutData.quantity,
+                    price: checkoutData.amount,
+                }
+            ],
+            payment_type: "payment_link",
+            payment_link: "https://paymentlink.comz"
+            // amount: ""
+        }
+
+        const merchantServerKey = `${MIDTRANS_SERVER_KEY}:`
+        const invoice = axios.post("https://api.sandbox.midtrans.com/v1/invoices", invoiceParams, {
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                Authorization: `Basic ${Buffer.from(merchantServerKey).toString('base64')}`
+            }
+        })
+        .then((response) => {
+            return response;
+        })
+        .catch((err: any) => {
+            console.error(err.response.data);
+        })
+
+        return {transaction, invoice}
     }
 }
