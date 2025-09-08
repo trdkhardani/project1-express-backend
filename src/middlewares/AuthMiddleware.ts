@@ -58,13 +58,31 @@ export class AuthMiddleware {
             }
 
             req.admin = {
-                admin_id: decoded.admin_email,
+                admin_id: decoded.admin_id,
                 admin_email: decoded.admin_email,
                 admin_username: decoded.admin_username,
                 user_role: decoded.user_role,
-                cinema_chain_id: decoded.cinema_chain_id
+                cinema_chain_id: decoded.cinema_chain_id || "NULL"
             }
             next();
+        } catch(err: TokenExpiredError | any) {
+            if(err) {
+                response = await unauthorizedResponse(err.message);
+                return res.status(Number(response.statusCode)).json(response);
+            }
+            next(err)
+        }
+    }
+
+    static async superadmin(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        let response;
+        try {
+            if(req.admin?.user_role === UserRole.SUPERADMIN) {
+                next();
+            } else {
+                response = await unauthorizedResponse("You are not allowed to access this resource (Superadmin only)")
+                return res.status(response.statusCode).json(response)
+            }
         } catch(err: TokenExpiredError | any) {
             if(err) {
                 response = await unauthorizedResponse(err.message);

@@ -1,5 +1,5 @@
 import type { ResponseInterface } from "../../../models/response";
-import { anyErrorResponse, internalServerErrorResponse, successResponse } from "../../../utils/response.utils";
+import { anyErrorResponse, conflictResponse, internalServerErrorResponse, successResponse } from "../../../utils/response.utils";
 import { StripeInstance } from "../../../utils/stripe.utils";
 import { PrismaClient } from "../../../generated/prisma";
 const prisma = new PrismaClient();
@@ -12,7 +12,8 @@ export class StripeAccountService {
                     cinema_chain: {
                         select: {
                             cinema_chain_id: true,
-                            cinema_chain_brand: true
+                            cinema_chain_brand: true,
+                            cinema_chain_stripe_account_id: true,
                         }
                     }
                 },
@@ -20,6 +21,10 @@ export class StripeAccountService {
                     admin_id: adminId
                 }
             })
+
+            if(admin?.cinema_chain.cinema_chain_stripe_account_id) {
+                return conflictResponse("Stripe account already exists")
+            }
 
             const stripeAccount = await StripeInstance.createStripeAccount({
                 businessName: admin?.cinema_chain.cinema_chain_brand as string,
@@ -58,6 +63,7 @@ export class StripeAccountService {
                                 cinema_chain_id: true,
                                 cinema_chain_brand: true,
                                 cinema_chain_stripe_account_id: true,
+                                cinema_chain_stripe_account_url: true,
                             }
                         }
                     },
@@ -65,6 +71,10 @@ export class StripeAccountService {
                         admin_id: adminId
                     }
             })
+
+            if(admin?.cinema_chain.cinema_chain_stripe_account_url) {
+                return conflictResponse("Stripe account link already exists")
+            }
     
             const accountLink = await StripeInstance.createAccountLink(admin?.cinema_chain.cinema_chain_stripe_account_id!)
             .then((data) => {

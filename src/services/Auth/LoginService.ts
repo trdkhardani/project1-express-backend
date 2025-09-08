@@ -52,18 +52,34 @@ export async function loginUser(loginData: UserLoginInterface):Promise<ResponseI
 
 export async function loginAdmin(loginData: UserLoginInterface): Promise<ResponseInterface<{}>> {
     try {
-        const admin = await prisma.admin.findFirst({
-            where: {
-                OR: [
-                    {
-                        admin_email: loginData.email
-                    },
-                    {
-                        admin_username: loginData.username
-                    }
-                ]
-            }
-        })
+        let admin: any;
+        if(loginData.role.toLowerCase() === UserRole.SUPERADMIN) {
+            admin = await prisma.superadmin.findFirst({
+                where: {
+                    OR: [
+                        {
+                            admin_email: loginData.email
+                        },
+                        {
+                            admin_username: loginData.username
+                        }
+                    ]
+                }
+            })
+        } else {
+            admin = await prisma.admin.findFirst({
+                where: {
+                    OR: [
+                        {
+                            admin_email: loginData.email
+                        },
+                        {
+                            admin_username: loginData.username
+                        }
+                    ]
+                }
+            })
+        }
 
         if(!admin) {
             return unauthorizedResponse("Invalid email/username or password")
@@ -75,7 +91,7 @@ export async function loginAdmin(loginData: UserLoginInterface): Promise<Respons
             return unauthorizedResponse("Invalid email/username or password")
         }
 
-        const token = jwt.sign({admin_id: admin?.admin_id, admin_username: admin?.admin_username, admin_email: admin?.admin_email, user_role: UserRole.ADMIN, cinema_chain_id: admin?.cinema_chain_id}, JWT_SECRET_KEY, {
+        const token = jwt.sign({admin_id: admin?.admin_id, admin_username: admin?.admin_username, admin_email: admin?.admin_email, user_role: UserRole.ADMIN, cinema_chain_id: admin?.cinema_chain_id || "NULL"}, JWT_SECRET_KEY, {
             expiresIn: '12h'
         })
 

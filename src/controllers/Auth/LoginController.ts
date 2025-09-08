@@ -22,12 +22,12 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         })
 
         let response;
-        if(validatedData.userRole.toLowerCase() === UserRole.ADMIN) {
+        if(validatedData.userRole.toLowerCase() === UserRole.ADMIN || validatedData.userRole.toLowerCase() === UserRole.SUPERADMIN) {
             response = await LoginService.loginAdmin({
                 email: validatedData.userEmail as string,
                 username: validatedData.userUsername as string,
                 password: validatedData.userPassword,
-                role: UserRole.ADMIN
+                role: validatedData.userRole as UserRole
             })
         } else {
             response = await LoginService.loginUser({

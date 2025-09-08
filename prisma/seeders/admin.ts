@@ -3,6 +3,17 @@ import bcrypt from 'bcrypt'
 const prisma = new PrismaClient()
 
 export async function seedAdmin() {
+    await prisma.superadmin.createMany({
+        data: [
+            {
+                admin_id: "73712e05-8f0a-4973-9c2a-05b4aadc91ef",
+                admin_email: "superadmin@mail.id",
+                admin_username: "superadmin",
+                admin_password: await bcrypt.hash("superadmin-123", 12),
+            }
+        ]
+    })
+
     await prisma.admin.createMany({
         data: [
             {

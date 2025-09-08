@@ -1,6 +1,7 @@
 export enum UserRole {
     USER = "user",
-    ADMIN = "admin"
+    ADMIN = "admin",
+    SUPERADMIN = "superadmin"
 }
 
 export interface UserDataPayload {

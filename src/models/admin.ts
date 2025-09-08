@@ -5,5 +5,5 @@ export interface AdminDataPayload {
     admin_username: string, 
     admin_email: string, 
     user_role: UserRole, 
-    cinema_chain_id: string
+    cinema_chain_id?: string
 }
