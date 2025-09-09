@@ -52,19 +52,19 @@ export class AuthMiddleware {
 
             const decoded = jwt.verify(token, JWT_SECRET_KEY) as AdminDataPayload
 
-            if(decoded.user_role !== UserRole.ADMIN) {
-                response = await forbiddenResponse("You are not allowed to access this resource");
-                return res.status(Number(response.statusCode)).json(response);
+            if(decoded.user_role === UserRole.ADMIN || decoded.user_role === UserRole.SUPERADMIN) {
+                req.admin = {
+                    admin_id: decoded.admin_id,
+                    admin_email: decoded.admin_email,
+                    admin_username: decoded.admin_username,
+                    user_role: decoded.user_role,
+                    cinema_chain_id: decoded.cinema_chain_id || "NULL"
+                }
+                next();
+            } else {
+                response = await forbiddenResponse("You are not allowed to access this resource (Admin only)")
+                return res.status(response.statusCode).json(response)
             }
-
-            req.admin = {
-                admin_id: decoded.admin_id,
-                admin_email: decoded.admin_email,
-                admin_username: decoded.admin_username,
-                user_role: decoded.user_role,
-                cinema_chain_id: decoded.cinema_chain_id || "NULL"
-            }
-            next();
         } catch(err: TokenExpiredError | any) {
             if(err) {
                 response = await unauthorizedResponse(err.message);
@@ -80,7 +80,7 @@ export class AuthMiddleware {
             if(req.admin?.user_role === UserRole.SUPERADMIN) {
                 next();
             } else {
-                response = await unauthorizedResponse("You are not allowed to access this resource (Superadmin only)")
+                response = await forbiddenResponse("You are not allowed to access this resource (Superadmin only)")
                 return res.status(response.statusCode).json(response)
             }
         } catch(err: TokenExpiredError | any) {

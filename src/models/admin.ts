@@ -7,3 +7,10 @@ export interface AdminDataPayload {
     user_role: UserRole, 
     cinema_chain_id?: string
 }
+
+export interface CreateMovieData {
+    movie_title: string,
+    movie_synopsis: string,
+    movie_duration: number,
+    movie_poster: string
+}

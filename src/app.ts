@@ -7,10 +7,15 @@ import MovieRoutes from './routes/MovieRoutes.ts'
 import BookingRoutes from './routes/BookingRoutes.ts'
 import TemporaryRoutes from './routes/TemporaryRoutes.ts'
 import { AuthMiddleware } from './middlewares/AuthMiddleware.ts';
+import path from 'path';
+import bodyParser from 'body-parser';
 
 const app = express();
 
+app.use(express.urlencoded({extended: true}))
 app.use(express.json());
+
+app.use('/public', express.static(path.join(__dirname, 'public')))
 
 // Routes
 app.use("/", IndexRoutes);

@@ -1,3 +1,4 @@
+// import type { Multer } from "multer";
 import type { AdminDataPayload } from "./admin";
 import type { UserDataPayload, UserRole } from "./user";
 import type { Request } from "express";

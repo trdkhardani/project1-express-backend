@@ -53,7 +53,9 @@ export async function loginUser(loginData: UserLoginInterface):Promise<ResponseI
 export async function loginAdmin(loginData: UserLoginInterface): Promise<ResponseInterface<{}>> {
     try {
         let admin: any;
+        let userRole: UserRole;
         if(loginData.role.toLowerCase() === UserRole.SUPERADMIN) {
+            userRole = UserRole.SUPERADMIN
             admin = await prisma.superadmin.findFirst({
                 where: {
                     OR: [
@@ -67,6 +69,7 @@ export async function loginAdmin(loginData: UserLoginInterface): Promise<Respons
                 }
             })
         } else {
+            userRole = UserRole.ADMIN
             admin = await prisma.admin.findFirst({
                 where: {
                     OR: [
@@ -91,7 +94,7 @@ export async function loginAdmin(loginData: UserLoginInterface): Promise<Respons
             return unauthorizedResponse("Invalid email/username or password")
         }
 
-        const token = jwt.sign({admin_id: admin?.admin_id, admin_username: admin?.admin_username, admin_email: admin?.admin_email, user_role: UserRole.ADMIN, cinema_chain_id: admin?.cinema_chain_id || "NULL"}, JWT_SECRET_KEY, {
+        const token = jwt.sign({admin_id: admin?.admin_id, admin_username: admin?.admin_username, admin_email: admin?.admin_email, user_role: userRole, cinema_chain_id: admin?.cinema_chain_id || "NULL"}, JWT_SECRET_KEY, {
             expiresIn: '12h'
         })
 
