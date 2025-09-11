@@ -1,4 +1,4 @@
-import type { UserRole } from "./user";
+import type { UserRole } from "./user.ts";
 
 export interface AdminDataPayload {
     admin_id: string,
@@ -13,4 +13,12 @@ export interface CreateMovieData {
     movie_synopsis: string,
     movie_duration: number,
     movie_poster: string
+}
+
+export interface UpdateMovieData {
+    movie_id: string,
+    movie_title?: string,
+    movie_synopsis?: string,
+    movie_duration?: number,
+    movie_poster?: string
 }

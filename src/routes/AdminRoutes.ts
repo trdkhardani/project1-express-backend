@@ -12,5 +12,6 @@ router.get("/stripe/account", StripeAccountController.getAccountInfo)
 
 // Movie
 router.post("/movies", AuthMiddleware.superadmin, upload("src/public/movie_posters").single('movie_poster'), MovieController.createMovie)
+router.patch("/movies/:movieId", AuthMiddleware.superadmin, upload("src/public/movie_posters").single('movie_poster'), MovieController.updateMovie)
 
 export default router;

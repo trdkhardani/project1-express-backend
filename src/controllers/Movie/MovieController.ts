@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import * as MovieService from '../../services/Movie/MovieService'
+import * as MovieService from '../../services/Movie/MovieService.ts'
 
 export async function movieList(req: Request, res: Response, next: NextFunction) {
     try {

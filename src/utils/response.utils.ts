@@ -1,4 +1,4 @@
-import { Status, type ResponseInterface } from '../models/response';
+import { Status, type ResponseInterface } from '../models/response.ts';
 
 export const successResponse = async (data: any, message?: string) => {
     return {

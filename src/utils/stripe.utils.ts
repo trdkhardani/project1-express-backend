@@ -1,6 +1,6 @@
 import Stripe from "stripe";
 import dotenv from 'dotenv'
-import type { StripeAccountCreationData, StripeCheckoutData } from "../models/stripe";
+import type { StripeAccountCreationData, StripeCheckoutData } from "../models/stripe.ts";
 dotenv.config()
 
 const STRIPE_TEST_SECRET_KEY = process.env.STRIPE_TEST_SECRET_KEY as string

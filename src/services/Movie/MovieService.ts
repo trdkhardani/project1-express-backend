@@ -1,10 +1,10 @@
-import { PrismaClient } from "../../generated/prisma";
-import { movieListQuery } from "../../generated/prisma/sql";
-import type { MovieSearch } from "../../models/movie";
+import { PrismaClient } from "../../generated/prisma/index.js";
+import { movieListQuery } from "../../generated/prisma/sql/movieListQuery.js";
+import type { MovieSearch } from "../../models/movie.ts";
 const prisma = new PrismaClient();
 
-import { type ResponseInterface } from "../../models/response";
-import { internalServerErrorResponse, successResponse } from "../../utils/response.utils";
+import { type ResponseInterface } from "../../models/response.ts";
+import { internalServerErrorResponse, successResponse } from "../../utils/response.utils.ts";
 
 export async function movieList(movieSearch: MovieSearch):Promise<ResponseInterface<{}>> {
     try {

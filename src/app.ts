@@ -16,8 +16,8 @@ const app = express();
 app.use(express.urlencoded({extended: true}))
 app.use(express.json());
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename)
+export const __filename = fileURLToPath(import.meta.url);
+export const __dirname = path.dirname(__filename)
 app.use('/public', express.static(path.join(__dirname, 'public')))
 
 // Routes

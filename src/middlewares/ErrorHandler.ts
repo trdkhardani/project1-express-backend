@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
-import { Status } from "../models/response";
-import { badRequestResponse, internalServerErrorResponse } from "../utils/response.utils";
+import { Status } from "../models/response.ts";
+import { badRequestResponse, internalServerErrorResponse } from "../utils/response.utils.ts";
 import { MulterError } from "multer";
 
 export interface AppError extends Error {
