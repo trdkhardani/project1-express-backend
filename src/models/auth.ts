@@ -1,6 +1,6 @@
 // import type { Multer } from "multer";
-import type { AdminDataPayload } from "./admin";
-import type { UserDataPayload, UserRole } from "./user";
+import type { AdminDataPayload } from "./admin.ts";
+import type { UserDataPayload, UserRole } from "./user.ts";
 import type { Request } from "express";
 
 export interface UserRegistrationInterface {

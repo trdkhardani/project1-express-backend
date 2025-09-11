@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { StripeAccountController } from "../controllers/Admin/Stripe/AccountController";
-import { MovieController } from "../controllers/Admin/Movie/MovieController";
-import { AuthMiddleware } from "../middlewares/AuthMiddleware";
-import { upload } from "../utils/multer.utils";
+import { StripeAccountController } from "../controllers/Admin/Stripe/AccountController.ts";
+import { MovieController } from "../controllers/Admin/Movie/MovieController.ts";
+import { AuthMiddleware } from "../middlewares/AuthMiddleware.ts";
+import { upload } from "../utils/multer.utils.ts";
 const router = Router();
 
 // Stripe

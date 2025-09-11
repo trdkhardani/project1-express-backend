@@ -1,13 +1,15 @@
 {
   "name": "project1-express-backend",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npx tsc",
     "start": "node dist/server/server.js",
     "seed": "tsx prisma/seeders/index.ts",
-    "dev": "tsx watch src/server/server.ts"
+    "dev:rest": "tsx watch src/server/server-rest.ts",
+    "dev:graphql": "tsx watch src/server/server-graphql.ts"
   },
   "author": "Tridiktya Hardani Putra",
   "license": "ISC",
@@ -20,6 +22,8 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "graphql": "^16.11.0",
+    "graphql-http": "^1.22.4",
     "jsonwebtoken": "^9.0.2",
     "midtrans-client": "^1.4.3",
     "multer": "^2.0.2",
@@ -27,6 +31,7 @@
     "nodemailer": "^7.0.5",
     "prisma": "^6.14.0",
     "qrcode": "^1.5.4",
+    "ruru": "^2.0.0-beta.30",
     "slugify": "^1.6.6",
     "stripe": "^18.5.0",
     "zod": "^4.0.17"

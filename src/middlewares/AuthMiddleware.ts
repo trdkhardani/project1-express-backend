@@ -1,9 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
-import { forbiddenResponse, unauthorizedResponse } from "../utils/response.utils";
-import jwt, { JsonWebTokenError, TokenExpiredError, type JwtPayload } from "jsonwebtoken";
-import { UserRole, type UserDataPayload } from "../models/user";
-import type { AdminDataPayload } from "../models/admin";
-import type { AuthenticatedRequest } from "../models/auth";
+import { forbiddenResponse, unauthorizedResponse } from "../utils/response.utils.ts";
+import jwt, { type JsonWebTokenError, type TokenExpiredError, type JwtPayload } from "jsonwebtoken";
+import { UserRole, type UserDataPayload } from "../models/user.ts";
+import type { AdminDataPayload } from "../models/admin.ts";
+import type { AuthenticatedRequest } from "../models/auth.ts";
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY as string; 
 

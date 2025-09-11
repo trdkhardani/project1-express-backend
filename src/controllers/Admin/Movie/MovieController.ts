@@ -1,9 +1,9 @@
 import type { NextFunction, Request, Response } from "express";
-import { MovieService } from "../../../services/Admin/Movie/MovieService";
-import type { AuthenticatedRequest } from "../../../models/auth";
-import { CreateMovieData } from "../../../schemas/MovieSchema";
+import { MovieService } from "../../../services/Admin/Movie/MovieService.ts";
+import type { AuthenticatedRequest } from "../../../models/auth.ts";
+import { CreateMovieData } from "../../../schemas/MovieSchema.ts";
 import { ZodError } from "zod";
-import { badRequestResponse } from "../../../utils/response.utils";
+import { badRequestResponse } from "../../../utils/response.utils.ts";
 import { MulterError } from "multer";
 
 export class MovieController {

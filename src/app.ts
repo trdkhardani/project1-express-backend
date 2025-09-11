@@ -8,6 +8,7 @@ import BookingRoutes from './routes/BookingRoutes.ts'
 import TemporaryRoutes from './routes/TemporaryRoutes.ts'
 import { AuthMiddleware } from './middlewares/AuthMiddleware.ts';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import bodyParser from 'body-parser';
 
 const app = express();
@@ -15,6 +16,8 @@ const app = express();
 app.use(express.urlencoded({extended: true}))
 app.use(express.json());
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename)
 app.use('/public', express.static(path.join(__dirname, 'public')))
 
 // Routes
