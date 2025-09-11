@@ -4,14 +4,14 @@ import { testObjectType } from "../ObjectTypes/TestType.ts"
 
 export const testFieldConfig: GraphQLFieldConfig<any, any> = {
     type: GraphQLString,
-    resolve: () => {
+    resolve: (_) => {
         return "It works!"
     }
 }
 
 export const objectTestFieldConfig: GraphQLFieldConfig<any, any> = {
     type: testObjectType,
-    resolve: () => {
+    resolve: (_) => {
         return {
             status: Status.true,
             message: "It works"
