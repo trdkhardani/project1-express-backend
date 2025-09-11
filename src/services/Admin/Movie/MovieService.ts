@@ -1,7 +1,8 @@
 import type { CreateMovieData, UpdateMovieData } from "../../../models/admin.ts";
 import type { ResponseInterface } from "../../../models/response.ts";
-import { internalServerErrorResponse, successResponse } from "../../../utils/response.utils.ts";
+import { badRequestResponse, internalServerErrorResponse, successResponse } from "../../../utils/response.utils.ts";
 import { PrismaClient } from "../../../generated/prisma/index.js";
+import { FsUtils } from "../../../utils/fs.utils.ts";
 const prisma = new PrismaClient();
 
 export class MovieService {
@@ -40,6 +41,33 @@ export class MovieService {
             return successResponse(updateMovie, `Movie with ID ${updateMovie.movie_id} successfully updated`)
         } catch(err: any) {
             console.error(err);
+            return internalServerErrorResponse();
+        }
+    }
+
+    static async deleteMovie(movieId: string):Promise<ResponseInterface<{}>> {
+        try {
+            const movie = await prisma.movie.findUnique({
+                where: {
+                    movie_id: movieId
+                }
+            })
+
+            if(!movie) {
+                return successResponse(null, `No movie with ID ${movieId} found`)
+            }
+
+            FsUtils.deleteFile(movie.movie_poster)
+
+            const deleteMovie = await prisma.movie.delete({
+                where: {
+                    movie_id: movieId
+                }
+            })
+
+            return successResponse(deleteMovie, `Movie with ID ${deleteMovie.movie_id} successfully deleted`)
+        } catch(err: any) {
+            console.error(err)
             return internalServerErrorResponse();
         }
     }

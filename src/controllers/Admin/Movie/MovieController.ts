@@ -90,4 +90,16 @@ export class MovieController {
             next(err)
         }
     }
+
+    static async deleteMovie(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        try {
+            const movieId = req.params.movieId as string
+
+            const response = await MovieService.deleteMovie(movieId);
+
+            return res.status(Number(response.statusCode)).json(response)
+        } catch(err: any) {
+            next(err)
+        }
+    }
 }
