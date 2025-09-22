@@ -1,5 +1,5 @@
 import * as z from 'zod';
-import { UserRole } from '../models/user';
+import { UserRole } from '../models/user.ts';
 
 export const RegisterUserData = z.object({
     userEmail: z.email("Email must in a valid format"),

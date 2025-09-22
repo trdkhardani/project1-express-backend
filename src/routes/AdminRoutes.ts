@@ -3,6 +3,7 @@ import { StripeAccountController } from "../controllers/Admin/Stripe/AccountCont
 import { MovieController } from "../controllers/Admin/Movie/MovieController.ts";
 import { AuthMiddleware } from "../middlewares/AuthMiddleware.ts";
 import { upload } from "../utils/multer.utils.ts";
+import { TheaterController } from "../controllers/Admin/Theater/TheaterController.ts";
 const router = Router();
 
 // Stripe
@@ -14,5 +15,8 @@ router.get("/stripe/account", StripeAccountController.getAccountInfo)
 router.post("/movies", AuthMiddleware.superadmin, upload("src/public/movie_posters").single('movie_poster'), MovieController.createMovie)
 router.patch("/movies/:movieId", AuthMiddleware.superadmin, upload("src/public/movie_posters").single('movie_poster'), MovieController.updateMovie)
 router.delete("/movies/:movieId", AuthMiddleware.superadmin, MovieController.deleteMovie)
+
+// Theater
+router.post("/theaters", TheaterController.createTheater)
 
 export default router;

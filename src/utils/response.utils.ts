@@ -9,6 +9,15 @@ export const successResponse = async (data: any, message?: string) => {
     }
 }
 
+export const createdResponse = async (data: any, message?: string) => {
+    return {
+        status: Status.true,
+        statusCode: 201,
+        data: data,
+        message: message || "Created"
+    }
+}
+
 export const acceptedResponse = async (message?: string) => {
     return {
         status: Status.true,
@@ -18,7 +27,7 @@ export const acceptedResponse = async (message?: string) => {
     }
 }
 
-export const badRequestResponse = async (message: string) => {
+export const badRequestResponse = async (message: any) => {
     return {
         status: Status.false,
         statusCode: 400,
