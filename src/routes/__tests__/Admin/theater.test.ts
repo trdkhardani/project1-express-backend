@@ -1,12 +1,13 @@
 import { PrismaClient } from "../../../generated/prisma/index.js";
 const prisma = new PrismaClient();
-import app from "../../../app.ts";
+import restApp from "../../../app.ts";
+import graphqlApp from "../../../graphql/app.ts";
 import request from "supertest";
 import config from "../../../config/config.ts";
 
 describe('POST /api/v1/admin/theaters', () => {
     it(`should return status code 401`, async () => {
-        const res = await request(app)
+        const res = await request(restApp)
         .post("/api/v1/admin/theaters")
 
         expect(res.statusCode).toEqual(401);
@@ -18,7 +19,7 @@ describe('POST /api/v1/admin/theaters', () => {
             theater_location: ""
         }
 
-        const res = await request(app)
+        const res = await request(restApp)
         .post("/api/v1/admin/theaters")
         .auth(config.adminToken, {
             type: "bearer"
@@ -37,7 +38,7 @@ describe('POST /api/v1/admin/theaters', () => {
             theater_location: "Test Location"
         }
 
-        const res = await request(app)
+        const res = await request(restApp)
         .post("/api/v1/admin/theaters")
         .auth(config.adminToken, {
             type: "bearer"
@@ -56,5 +57,103 @@ describe('POST /api/v1/admin/theaters', () => {
                 theater_id: res.body.data.theater_id
             }
         })
+    })
+})
+
+describe('GraphQL Theaters Query', () => {
+    it(`should return list of theaters`, async () => {
+        const GET_THEATERS_QUERY = `
+            query TheaterList {
+                theaters {
+                    theater_id
+                    cinema_chain_id
+                    theater_location
+                    theater_city
+                }
+            }
+        `;
+
+        const res = await request(graphqlApp)
+        .post("/graphql")
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+        .send({
+            query: GET_THEATERS_QUERY
+        })
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data.theaters).toEqual(expect.any(Array))
+    })
+
+    it(`should return error when theater_id is not provided`, async () => {
+        const GET_THEATER_BY_ID_QUERY = `
+            query TheaterById {
+                theaterById {
+                    theater_id
+                    cinema_chain_id
+                    theater_location
+                    theater_city
+                }
+            }
+        `;
+
+        const res = await request(graphqlApp)
+        .post("/graphql")
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+        .send({
+            query: GET_THEATER_BY_ID_QUERY
+        })
+
+        expect(res.body.errors[0].message).toEqual("Field \"theaterById\" argument \"theater_id\" of type \"ID!\" is required, but it was not provided.");
+    })
+
+    it(`should return error when no matching theater_id is not found`, async () => {
+        const GET_THEATER_BY_ID_QUERY = `
+            query TheaterById {
+                theaterById(theater_id: "sadasdas") {
+                    theater_id
+                    cinema_chain_id
+                    theater_location
+                    theater_city
+                }
+            }
+        `;
+
+        const res = await request(graphqlApp)
+        .post("/graphql")
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+        .send({
+            query: GET_THEATER_BY_ID_QUERY
+        })
+
+        expect(res.body.errors[0].message).toEqual("Cannot return null for non-nullable field Query.theaterById.");
+    })
+
+    it(`should return theater by ID`, async () => {
+        const args = `theater_id: "f21893ca-9295-43cf-a85c-dd8242ab4b24"`
+
+        const GET_THEATER_BY_ID_QUERY = `
+            query TheaterById {
+                    theaterById(${args}) {
+                    theater_id
+                    cinema_chain_id
+                    theater_location
+                    theater_city
+                }
+            }
+        `;
+
+        const res = await request(graphqlApp)
+        .post("/graphql")
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+        .send({
+            query: GET_THEATER_BY_ID_QUERY
+        })
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.data).toEqual(expect.any(Object));
     })
 })
