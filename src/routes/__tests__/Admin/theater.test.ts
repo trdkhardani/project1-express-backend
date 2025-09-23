@@ -157,3 +157,43 @@ describe('GraphQL Theaters Query', () => {
         expect(res.body.data).toEqual(expect.any(Object));
     })
 })
+
+describe('PATCH /api/v1/admin/theaters/{theaterId}', () => {
+    it(`should return status code 401`, async () => {
+        const res = await request(restApp)
+        .patch("/api/v1/admin/theaters/abc")
+
+        expect(res.statusCode).toEqual(401);
+    })
+
+    it(`should return status code 200 and successfully update a theater`, async () => {
+        const theaterId = "f21893ca-9295-43cf-a85c-dd8242ab4b24"
+        const payload = {
+            theater_city: "Test Update",
+            theater_location: "Test Update"
+        }
+
+        const res = await request(restApp)
+        .patch(`/api/v1/admin/theaters/${theaterId}`)
+        .auth(config.adminToken, {
+            type: "bearer"
+        })
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+        .send(payload)
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data.theater_city).toEqual(payload.theater_city)
+
+        // revert to the original data when the test is finished
+        await prisma.theater.update({
+            where: {
+                theater_id: theaterId
+            },
+            data: {
+                theater_city: "Surabaya",
+                theater_location: "Pakuwon City Mall"
+            }
+        })
+    })
+})

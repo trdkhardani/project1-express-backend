@@ -33,4 +33,24 @@ export class TheaterController {
             next(err)
         }
     }
+
+    static async updateTheater(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        try {
+            const theaterId = req.params.theaterId as string;
+            const {
+                theater_city,
+                theater_location
+            } = req.body
+
+            const response = await TheaterService.updateTheater({
+                theaterId: theaterId,
+                theaterCity: theater_city,
+                theaterLocation: theater_location
+            })
+
+            return res.status(response.statusCode!).json(response)
+        } catch(err: any) {
+            next(err)
+        }
+    }
 }

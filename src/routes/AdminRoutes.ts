@@ -18,5 +18,6 @@ router.delete("/movies/:movieId", AuthMiddleware.superadmin, MovieController.del
 
 // Theater
 router.post("/theaters", TheaterController.createTheater)
+router.patch("/theaters/:theaterId", TheaterController.updateTheater)
 
 export default router;
