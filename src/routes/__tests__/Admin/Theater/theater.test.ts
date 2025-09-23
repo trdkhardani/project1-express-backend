@@ -1,9 +1,9 @@
-import { PrismaClient } from "../../../generated/prisma/index.js";
+import { PrismaClient } from "../../../../generated/prisma/index.js";
 const prisma = new PrismaClient();
-import restApp from "../../../app.ts";
-import graphqlApp from "../../../graphql/app.ts";
+import restApp from "../../../../app.ts";
+import graphqlApp from "../../../../graphql/app.ts";
 import request from "supertest";
-import config from "../../../config/config.ts";
+import config from "../../../../config/config.ts";
 
 describe('POST /api/v1/admin/theaters', () => {
     it(`should return status code 401`, async () => {

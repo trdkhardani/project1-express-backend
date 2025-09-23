@@ -1,0 +1,39 @@
+import type { NextFunction, Response } from "express";
+import type { AuthenticatedRequest } from "../../../models/auth.ts";
+import { SeatService } from "../../../services/Admin/Theater/SeatService.ts";
+import { CreateTheaterData } from "../../../schemas/TheaterSchema.ts";
+import { ZodError } from "zod";
+import { badRequestResponse } from "../../../utils/response.utils.ts";
+import { CreateSeatSchema } from "../../../schemas/SeatSchema.ts";
+
+export class SeatController {
+    static async createSeats(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        try {
+            const theaterId = req.params.theaterId as string;
+            const {
+                seat_rows,
+                seats_each_row
+            } = req.body
+
+            const validatedData = CreateSeatSchema.parse({
+                theaterId: theaterId,
+                seatRows: Number(seat_rows),
+                seatsEachRow: Number(seats_each_row)
+            })
+
+            const response = await SeatService.createSeats({
+                theaterId: validatedData.theaterId,
+                seatRows: validatedData.seatRows,
+                seatsEachRow: validatedData.seatsEachRow
+            })
+
+            return res.status(response.statusCode!).json(response)
+        } catch(err: any) {
+            if(err instanceof ZodError) {
+                const response = await badRequestResponse(err.issues);
+                return res.status(response.statusCode).json(response)
+            }
+            next(err);
+        }
+    }
+}

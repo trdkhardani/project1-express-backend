@@ -4,6 +4,7 @@ import { MovieController } from "../controllers/Admin/Movie/MovieController.ts";
 import { AuthMiddleware } from "../middlewares/AuthMiddleware.ts";
 import { upload } from "../utils/multer.utils.ts";
 import { TheaterController } from "../controllers/Admin/Theater/TheaterController.ts";
+import { SeatController } from "../controllers/Admin/Theater/SeatController.ts";
 const router = Router();
 
 // Stripe
@@ -20,5 +21,8 @@ router.delete("/movies/:movieId", AuthMiddleware.superadmin, MovieController.del
 router.post("/theaters", TheaterController.createTheater)
 router.patch("/theaters/:theaterId", TheaterController.updateTheater)
 router.delete("/theaters/:theaterId", TheaterController.deleteTheater)
+
+// Theater Seats
+router.post("/seats/:theaterId", SeatController.createSeats)
 
 export default router;
