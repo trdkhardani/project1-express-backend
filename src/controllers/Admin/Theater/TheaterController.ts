@@ -53,4 +53,16 @@ export class TheaterController {
             next(err)
         }
     }
+
+    static async deleteTheater(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        try {
+            const theaterId = req.params.theaterId as string;
+
+            const response = await TheaterService.deleteTheater(theaterId)
+
+            return res.status(response.statusCode!).json(response)
+        } catch(err: any) {
+            next(err)
+        }
+    }
 }

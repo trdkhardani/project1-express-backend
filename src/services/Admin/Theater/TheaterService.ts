@@ -46,4 +46,24 @@ export class TheaterService {
             return internalServerErrorResponse();
         }
     }
+
+    static async deleteTheater(theaterId: string):Promise<ResponseInterface<{}>> {
+        try {
+            const theater = await prisma.theater.delete({
+                where: {
+                    theater_id: theaterId
+                }
+            })
+
+            return successResponse(theater, "Theater Successfully Deleted")
+        } catch(err: any) {
+            if(err instanceof PrismaClientKnownRequestError) {
+                if(err.code === "P2025") {
+                    return badRequestResponse(`No theater found`)
+                }
+            }
+            console.error(err);
+            return internalServerErrorResponse();
+        }
+    }
 }

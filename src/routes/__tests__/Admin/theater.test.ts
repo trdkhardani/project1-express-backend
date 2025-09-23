@@ -166,6 +166,25 @@ describe('PATCH /api/v1/admin/theaters/{theaterId}', () => {
         expect(res.statusCode).toEqual(401);
     })
 
+    it(`should return status code 400 because can't find the theater`, async () => {
+        const payload = {
+            theater_city: "Test Update",
+            theater_location: "Test Update"
+        }
+
+        const res = await request(restApp)
+        .patch(`/api/v1/admin/theaters/abc`)
+        .auth(config.adminToken, {
+            type: "bearer"
+        })
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+        .send(payload)
+
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.message).toEqual("No theater found")
+    })
+
     it(`should return status code 200 and successfully update a theater`, async () => {
         const theaterId = "f21893ca-9295-43cf-a85c-dd8242ab4b24"
         const payload = {
@@ -195,5 +214,49 @@ describe('PATCH /api/v1/admin/theaters/{theaterId}', () => {
                 theater_location: "Pakuwon City Mall"
             }
         })
+    })
+})
+
+describe('DELETE /api/v1/admin/theaters/{theaterId}', () => {
+    it(`should return status code 401`, async () => {
+        const res = await request(restApp)
+        .delete("/api/v1/admin/theaters/abc")
+
+        expect(res.statusCode).toEqual(401);
+    })
+
+    it(`should return status code 400 because can't find the theater`, async () => {
+        const res = await request(restApp)
+        .delete(`/api/v1/admin/theaters/abc`)
+        .auth(config.adminToken, {
+            type: "bearer"
+        })
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.message).toEqual("No theater found")
+    })
+
+    it(`should return status code 200 and successfully delete a theater`, async () => {
+        // create dummy theater data to test data deletion
+        const testTheater = await prisma.theater.create({
+            data: {
+                theater_city: "Test to be deleted",
+                theater_location: "Test to be deleted",
+                cinema_chain_id: "0b19181a-bfaf-4d7f-b791-6e4ef6d36df1"
+            }
+        })
+
+        const res = await request(restApp)
+        .delete(`/api/v1/admin/theaters/${testTheater.theater_id}`)
+        .auth(config.adminToken, {
+            type: "bearer"
+        })
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data.theater_id).toEqual(testTheater.theater_id)
     })
 })
