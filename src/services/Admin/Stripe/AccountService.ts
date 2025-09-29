@@ -1,7 +1,7 @@
-import type { ResponseInterface } from "../../../models/response";
-import { anyErrorResponse, conflictResponse, internalServerErrorResponse, successResponse } from "../../../utils/response.utils";
-import { StripeInstance } from "../../../utils/stripe.utils";
-import { PrismaClient } from "../../../generated/prisma";
+import type { ResponseInterface } from "../../../models/response.ts";
+import { anyErrorResponse, conflictResponse, internalServerErrorResponse, successResponse } from "../../../utils/response.utils.ts";
+import { StripeInstance } from "../../../utils/stripe.utils.ts";
+import { PrismaClient } from "../../../generated/prisma/index.js";
 const prisma = new PrismaClient();
 
 export class StripeAccountService {

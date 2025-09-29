@@ -114,6 +114,126 @@ describe("POST /api/v1/admin/seats/{theaterId}", () => {
 
         expect(res.statusCode).toEqual(201);
         expect(res.body.data.length).toEqual(payload.seat_rows * payload.seats_each_row);
+    })
+})
+
+describe("PATCH /api/v1/admin/seats/{theaterId}", () => {
+    it(`should return status code 401`, async () => {
+        const res = await request(restApp)
+        .patch(`/api/v1/admin/seats/${dummyTheater.theater_id}`)
+
+        expect(res.statusCode).toEqual(401);
+    })
+
+    it(`should return status code 200 and "No theater found or this theater doesn't have seats yet" message`, async () => {
+        const payload = {
+            seats: [
+                {
+                    theater_id: dummyTheater.theater_id,
+                    seat_row: "F",
+                    seat_number: 1
+                }
+            ]
+        }
+
+        const res = await request(restApp)
+        .patch("/api/v1/admin/seats/abc")
+        .auth(config.adminToken, {
+            type: "bearer"
+        })
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+        .send(payload)
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.message).toEqual("No theater found or this theater doesn't have seats yet");
+    })
+
+    it(`should return status code 400 and "No duplicate seats allowed" message`, async () => {
+        const payload = {
+            seats: [
+                {
+                    theater_id: dummyTheater.theater_id,
+                    seat_row: "F",
+                    seat_number: 1
+                },
+                {
+                    theater_id: dummyTheater.theater_id,
+                    seat_row: "F",
+                    seat_number: 1
+                }
+            ]
+        }
+
+        const res = await request(restApp)
+        .patch(`/api/v1/admin/seats/${dummyTheater.theater_id}`)
+        .auth(config.adminToken, {
+            type: "bearer"
+        })
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+        .send(payload)
+
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.message).toEqual("No duplicate seats allowed");
+    })
+
+    it(`should return status code 409 and "Cannot add seats with existing row and number" message`, async () => {
+        const payload = {
+            seats: [
+                {
+                    theater_id: dummyTheater.theater_id,
+                    seat_row: "F",
+                    seat_number: 1
+                },
+                {
+                    theater_id: dummyTheater.theater_id,
+                    seat_row: "A",
+                    seat_number: 4
+                }
+            ]
+        }
+
+        const res = await request(restApp)
+        .patch(`/api/v1/admin/seats/${dummyTheater.theater_id}`)
+        .auth(config.adminToken, {
+            type: "bearer"
+        })
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+        .send(payload)
+
+        expect(res.statusCode).toEqual(409);
+        expect(res.body.message).toEqual("Cannot add seats with existing row and number");
+    })
+
+    it(`should return status code 201 and append new seats`, async () => {
+        const payload = {
+            seats: [
+                {
+                    theater_id: dummyTheater.theater_id,
+                    seat_row: "F",
+                    seat_number: 1
+                },
+                {
+                    theater_id: dummyTheater.theater_id,
+                    seat_row: "F",
+                    seat_number: 2
+                }
+            ]
+        }
+
+        const res = await request(restApp)
+        .patch(`/api/v1/admin/seats/${dummyTheater.theater_id}`)
+        .auth(config.adminToken, {
+            type: "bearer"
+        })
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+        .send(payload)
+
+        expect(res.statusCode).toEqual(201);
+        expect(res.body.data.length).toEqual(payload.seats.length);
 
         // delete the dummy theater data after the tests are passed
         await prisma.theater.delete({

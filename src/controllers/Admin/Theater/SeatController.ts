@@ -36,4 +36,20 @@ export class SeatController {
             next(err);
         }
     }
+
+    static async appendSeats(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        try {
+            const theaterId = req.params.theaterId as string;
+            const seats = req.body.seats
+
+            const response = await SeatService.appendSeats({
+                theaterId: theaterId,
+                seats: seats,
+            })
+
+            return res.status(response.statusCode!).json(response)
+        } catch(err: any) {
+            next(err)
+        }
+    }
 }

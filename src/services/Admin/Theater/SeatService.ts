@@ -1,8 +1,9 @@
 import { PrismaClient } from "../../../generated/prisma/index.js";
 import { PrismaClientKnownRequestError } from "../../../generated/prisma/runtime/library.js";
 import type { ResponseInterface } from "../../../models/response.ts";
-import type { CreateSeatsData } from "../../../models/seat.ts";
-import { badRequestResponse, createdResponse, internalServerErrorResponse, successResponse } from "../../../utils/response.utils.ts";
+import type { CreateSeatsData, AppendSeatsData } from "../../../models/seat.ts";
+import { ArrayUtils } from "../../../utils/array.utils.ts";
+import { badRequestResponse, conflictResponse, createdResponse, internalServerErrorResponse, successResponse } from "../../../utils/response.utils.ts";
 const prisma = new PrismaClient();
 
 export class SeatService {
@@ -42,6 +43,54 @@ export class SeatService {
                     return badRequestResponse("No theater found")
                 }
             }
+            console.error(err);
+            return internalServerErrorResponse();
+        }
+    }
+
+    static async appendSeats(seatData: AppendSeatsData):Promise<ResponseInterface<{}>> {
+        try {
+            const existingSeats = await prisma.seat.findMany({
+                select: {
+                    theater_id: true,
+                    seat_row: true,
+                    seat_number: true
+                },
+                where: {
+                    theater_id: seatData.theaterId
+                }
+            });
+
+            if(existingSeats.length === 0) {
+                return successResponse(null, "No theater found or this theater doesn't have seats yet")
+            }
+
+            const mapExistingSeats = existingSeats.map((seat) => {
+                return `${seat.seat_row}${seat.seat_number}`
+            })
+
+            const mapSeatsInput = seatData.seats.map((seat) => {
+                return `${seat.seat_row}${seat.seat_number}`
+            })
+
+            for(let i = 0; i < mapExistingSeats.length; i++) {
+                if(mapExistingSeats.indexOf(mapSeatsInput[i] as string) !== -1) {
+                    return conflictResponse("Cannot add seats with existing row and number")
+                }
+            }
+
+            for(let i = 0; i < mapSeatsInput.length; i++) {
+                if(mapSeatsInput.filter(seat => seat === mapSeatsInput[i]).length > 1) {
+                    return badRequestResponse("No duplicate seats allowed")
+                }
+            }
+
+            await prisma.seat.createMany({
+                data: seatData.seats
+            })
+
+            return createdResponse(seatData.seats, "Seats successfully appended")
+        } catch(err: any) {
             console.error(err);
             return internalServerErrorResponse();
         }

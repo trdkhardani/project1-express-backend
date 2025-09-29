@@ -24,5 +24,6 @@ router.delete("/theaters/:theaterId", TheaterController.deleteTheater)
 
 // Theater Seats
 router.post("/seats/:theaterId", SeatController.createSeats)
+router.patch("/seats/:theaterId", SeatController.appendSeats)
 
 export default router;
