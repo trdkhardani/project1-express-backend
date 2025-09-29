@@ -52,4 +52,20 @@ export class SeatController {
             next(err)
         }
     }
+
+    static async deleteSeat(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+        try {
+            const theaterId = req.params.theaterId as string;
+            const seat_id = req.query.seat_id
+
+            const response = await SeatService.deleteSeat({
+                theaterId: theaterId,
+                seats: Number(seat_id)
+            })
+
+            return res.status(response.statusCode!).json(response)
+        } catch(err: any) {
+            next(err)
+        }
+    }
 }

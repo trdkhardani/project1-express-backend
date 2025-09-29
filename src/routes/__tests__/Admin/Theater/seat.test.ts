@@ -234,6 +234,62 @@ describe("PATCH /api/v1/admin/seats/{theaterId}", () => {
 
         expect(res.statusCode).toEqual(201);
         expect(res.body.data.length).toEqual(payload.seats.length);
+    })
+})
+
+describe(`DELETE /api/v1/admin/seats/{theaterId}?seat_id={seatId}`, () => {
+    it(`should return status code 401`, async () => {
+        const res = await request(restApp)
+        .delete(`/api/v1/admin/seats/${dummyTheater.theater_id}?seat_id=19`)
+
+        expect(res.statusCode).toEqual(401);
+    })
+
+    it(`should return status code 200 and "No record was found for a delete." (invalid seat_id)`, async () => {
+        const res = await request(restApp)
+        .delete(`/api/v1/admin/seats/${dummyTheater.theater_id}?seat_id=1`)
+        .auth(config.adminToken, {
+            type: "bearer"
+        })
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.message).toEqual("No record was found for a delete.")
+    })
+
+    it(`should return status code 200 and "No record was found for a delete." (invalid theater_id)`, async () => {
+        const res = await request(restApp)
+        .delete(`/api/v1/admin/seats/abc?seat_id=1`)
+        .auth(config.adminToken, {
+            type: "bearer"
+        })
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.message).toEqual("No record was found for a delete.")
+    })
+
+    it(`should retunr status code 200 and delete seat data`, async () => {
+        const dummySeat = await prisma.seat.create({
+            data: {
+                theater_id: dummyTheater.theater_id,
+                seat_row: "Z",
+                seat_number: 9
+            }
+        })
+
+        const res = await request(restApp)
+        .delete(`/api/v1/admin/seats/${dummyTheater.theater_id}?seat_id=${Number(dummySeat.seat_id)}`)
+        .auth(config.adminToken, {
+            type: "bearer"
+        })
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data.seat_id).toEqual(Number(dummySeat.seat_id))
 
         // delete the dummy theater data after the tests are passed
         await prisma.theater.delete({

@@ -17,3 +17,13 @@ export interface AppendSeatsData {
     // seatRow: string, 
     // seatsNumber: number
 }
+
+export interface DeleteSeatsData {
+    theaterId: string,
+    seats: number
+    // seats: [
+    //     {
+    //         seat_id: number
+    //     }
+    // ]
+}

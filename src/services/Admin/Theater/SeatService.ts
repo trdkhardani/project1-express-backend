@@ -1,8 +1,7 @@
 import { PrismaClient } from "../../../generated/prisma/index.js";
 import { PrismaClientKnownRequestError } from "../../../generated/prisma/runtime/library.js";
 import type { ResponseInterface } from "../../../models/response.ts";
-import type { CreateSeatsData, AppendSeatsData } from "../../../models/seat.ts";
-import { ArrayUtils } from "../../../utils/array.utils.ts";
+import type { CreateSeatsData, AppendSeatsData, DeleteSeatsData } from "../../../models/seat.ts";
 import { badRequestResponse, conflictResponse, createdResponse, internalServerErrorResponse, successResponse } from "../../../utils/response.utils.ts";
 const prisma = new PrismaClient();
 
@@ -91,6 +90,27 @@ export class SeatService {
 
             return createdResponse(seatData.seats, "Seats successfully appended")
         } catch(err: any) {
+            console.error(err);
+            return internalServerErrorResponse();
+        }
+    }
+
+    static async deleteSeat(seatData: DeleteSeatsData):Promise<ResponseInterface<{}>> {
+        try {
+            const deleteSeat = await prisma.seat.delete({
+                where: {
+                    theater_id: seatData.theaterId,
+                    seat_id: seatData.seats
+                }
+            })
+
+            return successResponse(deleteSeat, "Seat successfully deleted")
+        } catch(err: any) {
+            if(err instanceof PrismaClientKnownRequestError) {
+                if(err.code === "P2025") {
+                    return successResponse(null, err.meta?.cause as string)
+                }
+            }
             console.error(err);
             return internalServerErrorResponse();
         }
