@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
-import * as RegisterService from "../../services/Auth/RegisterService"
-import { RegisterUserData } from "../../schemas/UserSchema";
+import * as RegisterService from "../../services/Auth/RegisterService.ts";
+import { RegisterUserData } from "../../schemas/UserSchema.ts";
 import { ZodError } from "zod";
-import { badRequestResponse } from "../../utils/response.utils";
+import { badRequestResponse } from "../../utils/response.utils.ts";
 
 export async function register(req: Request, res: Response, next: NextFunction) {
     try {
@@ -29,10 +29,10 @@ export async function register(req: Request, res: Response, next: NextFunction) 
 
         return res.status(Number(response.statusCode)).json(response)
     } catch(err: any) {
-        next(err)
         if(err instanceof ZodError) {
-            return res.status(400).json(await badRequestResponse(err.issues[0]?.message as string))
+            return res.status(400).json(await badRequestResponse(err.issues))
         }
+        next(err);
     }
 }
 
@@ -58,9 +58,9 @@ export async function resendVerification(req: Request, res: Response, next: Next
 
         return res.status(Number(response.statusCode)).json(response)
     } catch(err) {
-        next(err)
         if(err instanceof ZodError) {
             return res.status(400).json(await badRequestResponse(err.issues[0]?.message as string))
         }
+        next(err)
     }
 }

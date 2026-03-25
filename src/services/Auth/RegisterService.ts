@@ -1,11 +1,11 @@
 import { PrismaClient } from '../../generated/prisma';
 import bcrypt from 'bcrypt';
-import jwt, { type JwtPayload } from 'jsonwebtoken'
-import type { UserDataPayload } from '../../models/user';
-import { type UserRegistrationInterface } from '../../models/auth';
-import { MailerUtils } from '../../utils/mailer.utils';
-import { Status, type ResponseInterface } from '../../models/response';
-import { badRequestResponse, conflictResponse, internalServerErrorResponse, successResponse } from '../../utils/response.utils';
+import jwt from 'jsonwebtoken'
+import type { UserDataPayload } from '../../models/user.ts';
+import { type UserRegistrationInterface } from '../../models/auth.ts';
+import { MailerUtils } from '../../utils/mailer.utils.ts';
+import { Status, type ResponseInterface } from '../../models/response.ts';
+import { badRequestResponse, conflictResponse, internalServerErrorResponse, successResponse } from '../../utils/response.utils.ts';
 const prisma = new PrismaClient();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY as string
 
@@ -28,6 +28,9 @@ export async function verifyUser(tokenizedUserId: string):Promise<ResponseInterf
             message: `User ${user.user_username} is successfully verified`
         }
     } catch(err: any) {
+        if(err instanceof jwt.JsonWebTokenError || err instanceof jwt.TokenExpiredError) {
+            return await conflictResponse('Verification link is either invalid or expired.');
+        }
         console.error(err)
         return internalServerErrorResponse();
     }
@@ -83,6 +86,10 @@ export async function resendVerification(userEmail: string):Promise<ResponseInte
                 user_email: userEmail
             }
         })
+
+        if(!user) {
+            return conflictResponse(`No user with email ${userEmail} found`)
+        }
 
         if(user?.user_status === "VERIFIED") {
             return await conflictResponse(`User with email ${user.user_email} has already been verified`)

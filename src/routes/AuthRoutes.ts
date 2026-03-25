@@ -1,6 +1,6 @@
 import { Router } from "express";
-import * as RegisterController from "../controllers/Auth/RegisterController";
-import * as LoginController from "../controllers/Auth/LoginController";
+import * as RegisterController from "../controllers/Auth/RegisterController.ts";
+import * as LoginController from "../controllers/Auth/LoginController.ts";
 const router = Router();
 
 router.post("/register", RegisterController.register)

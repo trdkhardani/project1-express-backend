@@ -6,6 +6,8 @@ import { Status } from "../../../models/response.ts";
 import type { App } from "supertest/types.js";
 import jwt from "jsonwebtoken";
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY as string
+const EXPIRED_TOKEN = process.env.EXPIRED_TOKEN as string
+const INVALID_TOKEN = process.env.INVALID_TOKEN as string
 
 const dummyUserData = await prisma.user.create({
     data: {
@@ -125,6 +127,26 @@ describe("POST /api/v1/auth/register", () => {
 });
 
 describe("GET /api/v1/auth/register/verify/{tokenizedUserId}", () => {
+    it("should show invalid link message (expired token)", async () => {
+        const res = await request(restApp)
+        .get(`/api/v1/auth/register/verify/${EXPIRED_TOKEN}`);
+
+        expect(res.body.status).toBe(Status.false);
+        expect(res.body.statusCode).toEqual(409);
+        expect(res.body.data).toBe(null);
+        expect(res.body.message).toBe('Verification link is either invalid or expired.');
+    });
+
+    it("should show invalid link message (invalid token)", async () => {
+        const res = await request(restApp)
+        .get(`/api/v1/auth/register/verify/${INVALID_TOKEN}`);
+
+        expect(res.body.status).toBe(Status.false);
+        expect(res.body.statusCode).toEqual(409);
+        expect(res.body.data).toBe(null);
+        expect(res.body.message).toBe('Verification link is either invalid or expired.');
+    });
+
     it("should show successful verification", async () => {
         const tokenizedUserId = jwt.sign({user_id: userVerificationTestData.user_id}, JWT_SECRET_KEY, {
             expiresIn: '1h'
@@ -141,6 +163,40 @@ describe("GET /api/v1/auth/register/verify/{tokenizedUserId}", () => {
 });
 
 describe("POST /api/v1/auth/register/resend-verification", () => {
+    it("should return invalid email validation", async () => {
+        const payload = {
+            user_email: 'NotAnEmail'
+        };
+        
+        const res = await request(restApp)
+        .post("/api/v1/auth/register/resend-verification")
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+        .send(payload);
+
+        expect(res.body.status).toBe(Status.false);
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.data).toBe(null);
+        expect(res.body.message).toBe('Email must in a valid format');
+    });
+
+    it("should return user not found (no corresponding user with the email)", async () => {
+        const payload = {
+            user_email: 'thisemailisnotexist@email.com'
+        };
+        
+        const res = await request(restApp)
+        .post("/api/v1/auth/register/resend-verification")
+        .set("Content-Type", "application/json")
+        .set("Accept", "application/json")
+        .send(payload);
+
+        expect(res.body.status).toBe(Status.false);
+        expect(res.statusCode).toEqual(409);
+        expect(res.body.data).toBe(null);
+        expect(res.body.message).toBe(`No user with email ${payload.user_email} found`);
+    });
+    
     it("should return email verification failed to resent because the user is already verified", async () => {
         const payload = {
             user_email: userVerificationTestData.user_email
