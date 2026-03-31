@@ -18,7 +18,7 @@ datasource db {
 model Superadmin {
   admin_id String @id @default(uuid())
   admin_email String @unique @db.VarChar(50)
-  admin_username String @unique @db.Char(15)
+  admin_username String @unique @db.VarChar(15)
   admin_password String
 
   @@map("superadmins")
@@ -28,7 +28,7 @@ model Admin {
   admin_id String @id @default(uuid())
   cinema_chain_id String
   admin_email String @unique @db.VarChar(50)
-  admin_username String @unique @db.Char(15)
+  admin_username String @unique @db.VarChar(15)
   admin_password String
   cinema_chain Cinema_Chain @relation(fields: [cinema_chain_id], references: [cinema_chain_id], onDelete: Cascade)
 
@@ -50,7 +50,7 @@ model Cinema_Chain {
 model User {
   user_id String @id @default(uuid())
   user_name String @db.VarChar(100)
-  user_username String @unique @db.Char(15)
+  user_username String @unique @db.VarChar(15)
   user_email String @unique @db.VarChar(50)
   user_password String
   user_status UserStatus @default(UNVERIFIED)
